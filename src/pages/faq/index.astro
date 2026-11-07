@@ -1,0 +1,345 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { url } from '../../utils/paths';
+import siteConfig from '../../config/site';
+import {
+  HelpCircle,
+  Search,
+  BookOpen,
+  ShieldCheck,
+  Server,
+  Zap,
+  Cpu,
+  Layers,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-astro';
+
+// 5 大卷 25 个专业万字级精选高频问答数据
+const faqCategories = [
+  {
+    id: 'protocol',
+    title: '第一卷：网络协议与专线物理层',
+    desc: '深度解析 VLESS、Trojan、Shadowsocks-2022 与物理专线传输本质。',
+    icon: Server,
+    color: 'text-cyan-400',
+    questions: [
+      {
+        q: 'VLESS、Trojan、Shadowsocks-2022 到底哪个最快最稳定？',
+        a: '协议没有绝对的优劣，关键在于使用场景。对于公网直连节点，推荐 Trojan 或 VLESS+Reality，因为它们具备完美的 TLS 真实网站伪装，防 GFW 主动探测能力最强；而对于 IEPL / IPLC 内网专线，推荐采用轻量化的 VLESS 或 Shadowsocks-2022，因为专线在物理内网传输无需重复套娃加密，精简协议可大幅降低握手延迟与设备 CPU 功耗。',
+        refLink: '/blog/01-mastering-iepl-iplc-architecture',
+        refText: '阅读专线原理解析',
+      },
+      {
+        q: '什么是真正的 IEPL 内网专线？它与普通公网中转有何不同？',
+        a: 'IEPL（国际以太网专线）属于电信运营商合规的二层内网传输电路。数据在境内的国内入口机房与境外落地机房之间通过专用光纤内网点对点通信，完全不经过公共因特网的国际出入口网关，因此物理上天然规避了 GFW 的深度包检测与晚高峰骨干网 QoS 限速。',
+        refLink: '/blog/01-mastering-iepl-iplc-architecture',
+        refText: '查看专线拓扑图',
+      },
+      {
+        q: '为什么晚高峰（20:00 - 23:00）有些机场经常批量红片断流？',
+        a: '这是普通公网中转和廉价直连机场的典型通病。在黄金晚高峰，国内运营商国际出口带宽极度拥堵，骨干网流控路由器会触发 QoS 限速惩罚，对高并发加密代理流量进行主动丢包，丢包率往往从白天的 0% 飙升至 20% 以上。而真专线由于走独立物理光纤，全天候丢包率稳定在 0% 左右。',
+        refLink: '/speedtest',
+        refText: '查看晚高峰测速对比',
+      },
+      {
+        q: '如何用终端命令 4 步验证手中节点是真专线还是假中转？',
+        a: '在终端执行 `mtr -rn -c 50 入口IP`。真专线从国内入口服务器到境外落地服务器之间只有 1 到 2 个内网跳数（如 10.x.x.x），且延迟增量等于物理光纤距离（深圳到香港约 3-5ms）；而假专线会出现 8-15 跳连续公网骨干网 IP（如 202.97 电信163），并在最后一跳延迟突然激增 60ms 以上。',
+        refLink: '/blog/01-mastering-iepl-iplc-architecture',
+        refText: '查看辨别实操教程',
+      },
+      {
+        q: '为什么移动宽带和电信宽带连接同一个节点的体验差异极大？',
+        a: '因为不同宽带运营商的跨网互联互通机制存在成本瓶颈。如果机场在国内只有电信机房单线入口，移动用户访问就必须先跨网传输到电信网络，产生额外延迟与丢包。优质机场会采购全国 BGP 多线入口，根据用户的宽带运营商智能调度至对应机房直连。',
+        refLink: '/airports',
+        refText: '查看 BGP 入口机场',
+      },
+    ],
+  },
+  {
+    id: 'ai-streaming',
+    title: '第二卷：流媒体与 AI 工具风控解密',
+    desc: '破解 ChatGPT 1020 报错、Claude 封号、Netflix 软降级与住宅 IP 属性。',
+    icon: Zap,
+    color: 'text-purple-400',
+    questions: [
+      {
+        q: '为什么有些节点能看 YouTube 4K，却无法使用 ChatGPT？',
+        a: '因为 YouTube 和 ChatGPT 的安全风控策略维度截然不同。YouTube 只要有带宽即可播放；而 OpenAI 和 Claude 深度接入了 Cloudflare 威胁情报数据库，对数据中心机房 IP（Hosting IP）和高并发代理实施严格拦截。只有具备原生住宅 ISP 特征、欺诈评分（Fraud Score）极低的节点才能顺利通行。',
+        refLink: '/blog/03-streaming-ai-unlocking-handbook',
+        refText: '阅读原生解锁全揭秘',
+      },
+      {
+        q: '遇到 ChatGPT 报错“Access Denied (Error 1020)”该怎么彻底解决？',
+        a: '第一步：在客户端中将节点切换为标有“原生”、“家宽”或“AI 专用”的高质量落地节点；第二步：检查客户端 DNS 设置，务必开启 Fake-IP 并关闭本地备用 DNS，防止本地 DNS 泄漏将中国大陆运营商 IP 暴露给 Cloudflare；第三步：清除浏览器 OpenAI 域名的全部 Cookie 后重新登录。',
+        refLink: '/blog/03-streaming-ai-unlocking-handbook',
+        refText: '查看排障步骤',
+      },
+      {
+        q: '什么是 Netflix 的“软降级（Soft Ban）”？怎么看自己是否被降级？',
+        a: '当 Netflix 识别到你的 IP 属于未授权商业代理时，它不会直接报错，而是屏蔽该地区所有第三方版权电影（如搜不到《绝命毒师》），只允许播放全球通用的自制剧（如《怪奇物语》），且锁死在 1080P 或 720P。只有使用支持原生流媒体解锁的节点，才能激活 4K HDR 片库。',
+        refLink: '/speedtest',
+        refText: '查看流媒体实测图',
+      },
+      {
+        q: '香港和台湾节点可以使用 ChatGPT 吗？',
+        a: '香港地区的 IP 目前不在 OpenAI 的官方直接开放服务列表内，因此香港节点默认无法使用 ChatGPT；而台湾、日本、新加坡、美国节点均在直接支持名单内。其中美国原生节点对新功能（如高级语音模式、Canvas、Sora）的灰度开放速度最快。',
+        refLink: '/blog/03-streaming-ai-unlocking-handbook',
+        refText: '查看地区支持对比',
+      },
+      {
+        q: '登录 Claude 账号为什么极其容易触发封号（Banned）？',
+        a: 'Anthropic（Claude）对 IP 跳跃极度敏感。如果在一次会话中前几分钟在香港 IP，后几分钟刷新到了美国 IP，这种跨大洲地理位置的“瞬间移动”会直接被系统风控模型判定为账号被盗或恶意共享而触发自动封禁。务必在客户端配置专门的分流规则，将 Claude 固定在单一稳定原生节点。',
+        refLink: '/blog/04-clash-verge-shadowrocket-rules',
+        refText: '学习分流规则编写',
+      },
+    ],
+  },
+  {
+    id: 'client-tuning',
+    title: '第三卷：客户端配置与排障实战',
+    desc: '系统代理与 TUN 模式底层机制、Fake-IP 原理及网卡冲突修复。',
+    icon: Cpu,
+    color: 'text-emerald-400',
+    questions: [
+      {
+        q: '为什么在电脑上推荐开启 TUN 模式而不是仅用系统代理？',
+        a: '传统系统代理模式只对主动遵循操作系统代理协议的应用程序（如 Chrome、Edge 浏览器）生效，而命令行终端（Git、npm、Docker）、UWP 应用以及各类外服网络游戏均绕过系统代理直接向物理网卡发送数据包导致代理失效。TUN 模式在操作系统内核中虚拟一张网卡，在三层网络层截获全部出入流量，使所有应用免配置自动享受代理分流。',
+        refLink: '/blog/04-clash-verge-shadowrocket-rules',
+        refText: '阅读 TUN 深度实践',
+      },
+      {
+        q: '开启代理后，国内软件（如微信、网银、淘宝）变慢甚至报错怎么办？',
+        a: '主要原因在于分流模式被错误设置为了“全局代理（Global Proxy）”，导致国内流量被强行绕行境外代理服务器。正确做法是将路由切换为“规则（Rule）”，并在规则集首部确保配置了 `GEOIP, CN, DIRECT` 与 `GEOSITE, cn, DIRECT`，使国内流量强制走本地物理宽带直连。',
+        refLink: '/blog/04-clash-verge-shadowrocket-rules',
+        refText: '获取推荐规则 YAML',
+      },
+      {
+        q: 'Clash Verge Rev 显示节点连接成功但浏览器打不开网页怎么排查？',
+        a: '依次检查：1. 节点延迟是否真实存活（点击测速查看是否有数字而非 Timeout）；2. 本地系统代理开关是否被其他网络软件关闭；3. 设备时间是否与网络时间精准同步（时间偏差超过 90 秒会导致 TLS 握手失败）；4. 若开启了 TUN 模式，检查设备管理器中 Wintun 虚拟网卡驱动是否被安全软件拦截。',
+        refLink: '/clients',
+        refText: '前往客户端指南',
+      },
+      {
+        q: '什么是 Fake-IP？它相比传统 Redir-Host 模式有什么提升？',
+        a: '传统代理发起网络请求前，客户端必须先等待本地向 DNS 服务器查询解析出真实 IP 后才能建立连接；而在 Fake-IP 模式下，客户端会立即返回一个虚拟保留 IP（如 198.18.0.x）让本地程序秒级建立连接，同时在远端代理节点并行解析真实域名。这一机制消除了本地 DNS 往返延迟与 DNS 污染。',
+        refLink: '/blog/04-clash-verge-shadowrocket-rules',
+        refText: '深入 Fake-IP 架构',
+      },
+      {
+        q: 'iOS 小火箭（Shadowrocket）长期开启会很费电吗？',
+        a: '正常配置下耗电极低。小火箭作为轻量级网络扩展运行在 iOS 的 Network Extension 框架内。耗电过快通常是因为误开启了全局代理或误打开了 HTTPS 证书解密（MITM）并开启了高并发重写脚本。保持路由为“配置（Config）”模式即可保持极佳续航。',
+        refLink: '/clients',
+        refText: '查看小火箭配置',
+      },
+    ],
+  },
+  {
+    id: 'anti-scam',
+    title: '第四卷：选购策略与防跑路避坑',
+    desc: '资金盘套路、节点倍率陷阱、月付安全法则与按量付费备份机制。',
+    icon: ShieldCheck,
+    color: 'text-amber-400',
+    questions: [
+      {
+        q: '为什么说“初次选购机场务必坚持月付”是第一铁律？',
+        a: '由于跨境代理行业的特殊属性，机场运维受到上游机房资质、网络环境波动等多重不可控因素影响。不论商家宣传多么华丽，年付或三年付等于将一两年的风险完全由用户单方面承担。月付或季付能让你在机场出现恶性超售或运营波动时，以极低代价自由切换。',
+        refLink: '/blog/02-airport-selection-guide-2026',
+        refText: '阅读防跑路指南',
+      },
+      {
+        q: '什么是“节点倍率陷阱”？购买套餐时如何防范？',
+        a: '许多低价机场表面上提供几百吉字节流量，但在节点列表中将常用线路标记为 3.0x、5.0x 甚至 10.0x 倍率。这意味着实际看 10GB 视频，后台会被暗扣 30GB ~ 100GB 流量，折算后的真实单价反而极高。优质机场（如光速云）全量节点通常保持 1.0x 透明计费。',
+        refLink: '/airports',
+        refText: '查看全透明机场',
+      },
+      {
+        q: '为什么说“按量付费（不限时流量包）”是每个人必备的备用方案？',
+        a: '周期性订阅（月付/季付）到期未用完的流量会被系统强制清零；而按量付费套餐通常永久有效。花几十元购买一个 200GB 的不限时流量包配置在客户端中作为次选备用组（Fallback），一旦主力机场临时维护或断线，网络会自动秒切备用链路，避免工作会议或重要沟通受阻。',
+        refLink: '/airports/guangshuyun',
+        refText: '查看147永久套餐',
+      },
+      {
+        q: '机场跑路前通常有哪些不可忽视的异常征兆？',
+        a: '典型征兆包括：1. 突然在群里狂推反常的超低价骨折年付（如 29.9 元三年）；2. 官方 Telegram 群组开启全员禁言或关闭评论；3. 工单系统数天无人响应；4. 核心节点大面积红片超时持续超过 72 小时无公告。出现两项以上即可判定处于高危跑路预警期。',
+        refLink: '/alert',
+        refText: '前往跑路情报局',
+      },
+      {
+        q: '机场支持支付宝或微信付款，说明它是合规正规企业吗？',
+        a: '不一定。市面绝大多数机场接入的是第三方个人或免签发卡平台聚合支付接口，并不代表其具备正规电信增值业务资质。付款界面出现风险提示是风控系统的常规行为，但尽量避免直接使用储蓄卡大额充值，坚持小额月付是最佳自保手段。',
+        refLink: '/blog/02-airport-selection-guide-2026',
+        refText: '查看支付避坑技巧',
+      },
+    ],
+  },
+  {
+    id: 'privacy',
+    title: '第五卷：隐私安全与合规边界',
+    desc: 'HTTPS 端到端加密原理、站长能否看到密码、DNS 泄漏防护。',
+    icon: BookOpen,
+    color: 'text-rose-400',
+    questions: [
+      {
+        q: '使用第三方机场，机场老板能看到我的账号密码或聊天记录吗？',
+        a: '不能。现代互联网 99% 以上的流量均采用 TLS/HTTPS 端到端加密传输（浏览器地址栏带有小锁图标）。机场服务器只能看到你连接的目标域名（例如访问了 google.com）和数据包大小，无法解密你在网页中输入的密码、信用卡信息或聊天内容。但前提是切勿随意在设备上信任第三方签发的根证书。',
+        refLink: '/blog/01-mastering-iepl-iplc-architecture',
+        refText: '了解加密传输原理',
+      },
+      {
+        q: '什么是 DNS 泄漏？它会对用户造成什么影响？',
+        a: 'DNS 泄漏是指你的代理软件虽然转发了网页流量，但域名解析请求（DNS Query）依然被发送到了国内本地运营商的 DNS 服务器（如 114.114.114.114）。这会导致本地运营商清晰获知你正在尝试访问哪些境外网站，并可能返回被污染的假 IP。开启 Fake-IP 或加密 DoH 即可彻底规避。',
+        refLink: '/blog/04-clash-verge-shadowrocket-rules',
+        refText: '配置防泄漏 DNS',
+      },
+      {
+        q: '如果我仅仅用于学术查资料、外贸办公与看剧，会有法律风险吗？',
+        a: '根据我国现行法律法规，未经国家电信主管部门批准私自建立或租用非法定信道开展跨境通信属于行政违规行为。但国家重点打击的是非法搭建、倒卖盈利性翻墙工具的黑产团伙与散布危害国家安全信息的违法行为。广大用户用于正常科研学习、外贸商务沟通应保持低调自律，绝不可利用网络发表不当言论。',
+        refLink: '/about',
+        refText: '阅读跑机场合规声明',
+      },
+    ],
+  },
+];
+
+// Schema.org FAQPage 生成
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqCategories.flatMap((cat) =>
+    cat.questions.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    }))
+  ),
+};
+---
+
+<BaseLayout
+  title="科学上网终极百科全书 | 万字级机场FAQ、协议原理解密与避坑问答 — 跑机场"
+  description="跑机场官方重磅发布：2026 科学上网与机场终极百科全书。涵盖协议物理层、ChatGPT/Netflix 4K 解锁风控、Clash Verge TUN 模式配置、防跑路避坑模型与 HTTPS 隐私安全等 5 大卷 25+ 个深度解答。"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <!-- Hero Header -->
+  <div class="mb-10 p-7 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.22),rgba(16,185,129,0.12)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-400/20 mb-3">
+        <HelpCircle class="w-3.5 h-3.5 text-emerald-400" />
+        全网科学上网终极百科全书 (FAQ Observatory)
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-50 tracking-tight leading-tight mb-4">
+        2026 机场终极百科全书：万字级深度问答与排障全卷
+      </h1>
+
+      <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6">
+        拒绝空洞低质的模板化问答。本百科涵盖 5 大卷、25 个深度实战高频问题，深度拆解底层协议、AI 风控、TUN 虚拟网卡配置、防跑路决策与端到端隐私安全，打造全网最硬核的技术答疑知识库。
+      </p>
+
+      <div class="flex flex-wrap items-center gap-2 pt-2">
+        {faqCategories.map((cat) => (
+          <a
+            href={`#${cat.id}`}
+            class="px-3.5 py-1.5 rounded-full liquid-pill hover:border-indigo-400/50 text-xs font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5"
+          >
+            <span>{cat.title.split('：')[1] || cat.title}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Volumes Container -->
+  <div class="space-y-12">
+    {faqCategories.map((cat) => {
+      const IconComponent = cat.icon;
+      return (
+        <section id={cat.id} class="p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl border border-white/10 scroll-mt-24">
+          <!-- Section Header -->
+          <div class="flex items-center justify-between border-b border-white/10 pb-5 mb-8">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                <IconComponent class={`w-5 h-5 ${cat.color}`} />
+              </div>
+              <div>
+                <h2 class="text-xl sm:text-2xl font-black text-white">
+                  {cat.title}
+                </h2>
+                <p class="text-xs text-zinc-400 mt-1">
+                  {cat.desc}
+                </p>
+              </div>
+            </div>
+            <span class="hidden sm:inline-block font-mono text-xs px-3 py-1 rounded-full liquid-pill text-zinc-300">
+              收录 {cat.questions.length} 篇深度解答
+            </span>
+          </div>
+
+          <!-- Questions Accordion / Cards -->
+          <div class="space-y-5">
+            {cat.questions.map((item, idx) => (
+              <div class="p-5 sm:p-6 rounded-2xl bg-white/5 hover:bg-white/[0.07] border border-white/10 transition-all">
+                <h3 class="text-base sm:text-lg font-bold text-white mb-3 flex items-start gap-2.5">
+                  <span class="font-mono text-indigo-400 text-sm font-semibold shrink-0 mt-0.5">
+                    Q{idx + 1}.
+                  </span>
+                  <span>{item.q}</span>
+                </h3>
+
+                <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed pl-6 border-l-2 border-indigo-500/30 mb-4">
+                  {item.a}
+                </p>
+
+                {item.refLink && (
+                  <div class="pl-6">
+                    <a
+                      href={url(item.refLink)}
+                      class="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors group"
+                    >
+                      <span>延伸深入：{item.refText}</span>
+                      <ArrowRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </a>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    })}
+  </div>
+
+  <!-- Bottom Cross Link Section -->
+  <div class="my-16 p-8 liquid-glass rounded-3xl border border-indigo-500/30 text-center relative overflow-hidden shadow-2xl">
+    <div class="relative z-10 max-w-xl mx-auto space-y-4">
+      <h3 class="text-2xl font-black text-white">
+        仍有其他未解的网络疑问？
+      </h3>
+      <p class="text-xs sm:text-sm text-zinc-300">
+        欢迎前往我们的实测技术博客阅读万字级独立架构解析，或直接查阅 42 家机场品牌库寻找答案。
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <a
+          href={url('/blog')}
+          class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-xl hover:scale-105 transition-all"
+        >
+          <span>查阅技术博客专栏</span>
+          <ArrowRight class="w-4 h-4" />
+        </a>
+        <a
+          href={url('/airports')}
+          class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full liquid-pill hover:border-indigo-400/40 text-zinc-200 font-bold text-xs sm:text-sm hover:scale-105 transition-all"
+        >
+          <span>进入 42 家品牌大厅</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

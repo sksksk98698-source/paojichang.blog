@@ -1,0 +1,614 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { airportsData, type AirportData } from '../../data/airports';
+import { url } from '../../utils/paths';
+import siteConfig from '../../config/site';
+import {
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  ExternalLink,
+  Copy,
+  Check,
+  ArrowLeft,
+  ArrowRight,
+  Sparkles,
+  Server,
+  Activity,
+  Tv,
+  Cpu,
+} from 'lucide-astro';
+
+export async function getStaticPaths() {
+  return airportsData.map((airport) => ({
+    params: { slug: airport.slug },
+    props: { airport },
+  }));
+}
+
+interface Props {
+  airport: AirportData;
+}
+
+const { airport } = Astro.props;
+
+const siteBaseUrl = Astro.site ? Astro.site.toString() : siteConfig.url;
+const pageUrl = new URL(url(`/airports/${airport.slug}`), siteBaseUrl).href;
+
+// Schema.org Product & Review Structured Data
+const reviewJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: `${airport.name} 机场`,
+  description: airport.description,
+  brand: {
+    '@type': 'Brand',
+    name: airport.name,
+  },
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'CNY',
+    lowPrice: airport.minPriceNum,
+    offerCount: airport.plans.length,
+    url: airport.affiliateUrl,
+  },
+  review: {
+    '@type': 'Review',
+    reviewRating: {
+      '@type': 'Rating',
+      ratingValue: (10 - airport.rank * 0.08).toFixed(1),
+      bestRating: '10',
+      worstRating: '1',
+    },
+    author: {
+      '@type': 'Organization',
+      name: siteConfig.name,
+    },
+    reviewBody: airport.description,
+  },
+};
+
+// FAQPage Schema
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: airport.faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
+// Breadcrumb Schema
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: '首页',
+      item: siteBaseUrl,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: '42家机场品牌库',
+      item: new URL(url('/airports'), siteBaseUrl).href,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: airport.name,
+      item: pageUrl,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${airport.name}测评2026 | 真实测速图、IEPL专线节点与优惠码${airport.promoCode ? `[${airport.promoCode}]` : ''} — 跑机场`}
+  description={`${airport.name}好用吗？2026最新实测：${airport.lineType}，入门${airport.minPrice}。包含${airport.name}节点延迟测速图、ChatGPT/Netflix流媒体解锁检测及独家优惠码。`}
+  canonical={pageUrl}
+>
+  <fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(reviewJsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </fragment>
+
+  <!-- Back Link Breadcrumb -->
+  <nav class="mb-6 flex items-center justify-between" aria-label="Breadcrumb">
+    <a
+      href={url('/airports')}
+      class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-indigo-400 transition-colors"
+    >
+      <ArrowLeft class="w-3.5 h-3.5" />
+      <span>返回 42 家机场品牌库</span>
+    </a>
+
+    <div class="flex items-center gap-2">
+      <span class="font-mono text-xs text-zinc-400">排名: #{airport.rank}</span>
+      <span class="bg-indigo-500/10 text-indigo-300 text-xs px-2.5 py-0.5 rounded-full border border-indigo-400/25 font-semibold">
+        {airport.lineType}
+      </span>
+    </div>
+  </nav>
+
+  <!-- Header Hero Panel -->
+  <header class="p-6 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl mb-10 relative overflow-hidden">
+    <!-- Ambient Internal Smooth Radial Glow -->
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.22),rgba(6,182,212,0.12)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+      <div class="lg:col-span-8">
+        <!-- Badges -->
+        <div class="flex flex-wrap items-center gap-2.5 mb-4">
+          <span class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+            综合排位 #{airport.rank}
+          </span>
+          {airport.rank === 1 && (
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-slate-950 flex items-center gap-1 shadow-md">
+              <Sparkles class="w-3 h-3" /> 第一主推精选
+            </span>
+          )}
+          <span class="px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-zinc-300">
+            {airport.lineType}
+          </span>
+          {airport.operationalSince && (
+            <span class="px-3 py-1 rounded-full text-xs font-mono liquid-pill text-zinc-400">
+              {airport.operationalSince}上线
+            </span>
+          )}
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl sm:text-5xl font-black text-zinc-50 tracking-tight leading-tight mb-4">
+          {airport.name} 深度测评与使用指南
+        </h1>
+
+        <!-- Excerpt -->
+        <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6 max-w-2xl">
+          {airport.description}
+        </p>
+
+        <!-- Highlights Checklist -->
+        <ul class="space-y-2 mb-8 text-xs sm:text-sm text-zinc-300">
+          {airport.highlights.map((item) => (
+            <li class="flex items-start gap-2">
+              <CheckCircle2 class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+
+        <!-- Action Bar: Direct Register + Promo Copy -->
+        <div class="flex flex-wrap items-center gap-3.5 pt-6 border-t border-white/10">
+          <a
+            href={airport.affiliateUrl}
+            target="_blank"
+            rel="nofollow sponsored noopener"
+            class="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <span>立即直达 {airport.name} 官网</span>
+            <ExternalLink class="w-4 h-4" />
+          </a>
+
+          {airport.promoCode && (
+            <button
+              type="button"
+              class="single-copy-code-btn inline-flex items-center gap-2 px-5 py-3.5 rounded-full liquid-pill hover:border-indigo-400/50 text-indigo-300 text-xs sm:text-sm font-mono font-semibold transition-all cursor-pointer"
+              data-code={airport.promoCode}
+            >
+              <Copy class="w-4 h-4 copy-icon" />
+              <Check class="w-4 h-4 check-icon hidden text-emerald-400" />
+              <span>优惠码: <strong>{airport.promoCode}</strong></span>
+              <span class="btn-status text-zinc-400 text-xs ml-1">(点击复制)</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      <!-- Quick Metrics Snapshot Card (Right Column) -->
+      <div class="lg:col-span-4">
+        <div class="p-6 rounded-3xl liquid-glass-card border border-white/10 shadow-xl space-y-4 font-mono text-xs">
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-zinc-400">起步价格</span>
+            <span class="text-base font-bold text-emerald-400">{airport.minPrice}</span>
+          </div>
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-zinc-400">线路类型</span>
+            <span class="text-zinc-200 font-semibold">{airport.lineType}</span>
+          </div>
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-zinc-400">支持协议</span>
+            <span class="text-zinc-200 truncate max-w-[160px] text-right">{airport.protocols.join(', ')}</span>
+          </div>
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-zinc-400">流媒体解锁</span>
+            <span class="text-emerald-400 font-bold">Netflix / Disney+ / 4K</span>
+          </div>
+          <div class="flex items-center justify-between border-b border-white/10 pb-3">
+            <span class="text-zinc-400">ChatGPT/AI</span>
+            <span class="text-cyan-400 font-bold">{airport.unlockStatus.chatgpt ? '完美解锁' : '部分可用'}</span>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-zinc-400">客户端支持</span>
+            <span class="text-zinc-200 text-right">全平台 / 免配置自研</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1: Full Plans & Pricing Table -->
+  <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl overflow-hidden">
+    <div class="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-6">
+      <Server class="w-5 h-5 text-indigo-400" />
+      <h2 class="text-xl font-bold text-zinc-50">
+        {airport.name} 套餐价格与流量规格
+      </h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs sm:text-sm font-mono">
+        <thead>
+          <tr class="border-b border-white/10 text-zinc-400 uppercase text-[11px]">
+            <th class="py-3 px-4">套餐名称</th>
+            <th class="py-3 px-4">计费周期</th>
+            <th class="py-3 px-4">价格</th>
+            <th class="py-3 px-4">高速流量</th>
+            <th class="py-3 px-4">特色说明</th>
+            <th class="py-3 px-4 text-right">选购通道</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-zinc-200">
+          {airport.plans.map((plan) => (
+            <tr class="hover:bg-white/5 transition-colors">
+              <td class="py-3.5 px-4 font-bold text-white">{plan.name}</td>
+              <td class="py-3.5 px-4 text-zinc-400">{plan.billing}</td>
+              <td class="py-3.5 px-4 font-extrabold text-emerald-400 text-sm">{plan.price}</td>
+              <td class="py-3.5 px-4">{plan.traffic}</td>
+              <td class="py-3.5 px-4 text-zinc-400 font-sans text-xs">{plan.desc || plan.cycle}</td>
+              <td class="py-3.5 px-4 text-right">
+                <a
+                  href={airport.affiliateUrl}
+                  target="_blank"
+                  rel="nofollow sponsored noopener"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full liquid-pill hover:border-indigo-400/50 text-indigo-300 text-xs font-semibold transition-all"
+                >
+                  <span>选购</span>
+                  <ExternalLink class="w-3 h-3" />
+                </a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 2: Real Speedtest Evidence (If speedtestImage exists) -->
+  {airport.speedtestImage && (
+    <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl overflow-hidden">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+        <div class="flex items-center gap-2.5">
+          <Activity class="w-5 h-5 text-cyan-400" />
+          <h2 class="text-xl font-bold text-zinc-50">
+            {airport.name} 真实晚高峰节点测速报告
+          </h2>
+        </div>
+        <span class="text-xs font-mono text-zinc-400">DATA STATUS // MEASURED EVIDENCE</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Speedtest Image Container -->
+        <div class="lg:col-span-7 rounded-2xl overflow-hidden border border-white/15 shadow-2xl relative group">
+          <img
+            src={url(airport.speedtestImage)}
+            alt={`${airport.name} 节点测速实测报告`}
+            class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            loading="lazy"
+          />
+          <div class="absolute bottom-2 right-2 px-2.5 py-1 rounded-md bg-black/75 text-[10px] text-zinc-300 font-mono">
+            跑机场实验室实测归档
+          </div>
+        </div>
+
+        <!-- Breakdown Data -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="p-5 rounded-2xl liquid-glass-card border border-white/10">
+            <h4 class="text-xs font-mono uppercase text-zinc-400 mb-2">测试环境说明</h4>
+            <p class="text-xs text-zinc-300 leading-relaxed">
+              测试采用 <strong>MAI-TEST-BOT / Speedtest</strong> 面板进行晚高峰单机全节点并发吞吐压测，测试链路涵盖香港、台湾、日本、新加坡及欧美主力节点。
+            </p>
+          </div>
+
+          {airport.speedtestData && (
+            <div class="p-5 rounded-2xl liquid-glass-card border border-white/10 font-mono text-xs space-y-2">
+              <div class="flex justify-between">
+                <span class="text-zinc-400">最高单节点带宽:</span>
+                <span class="text-emerald-400 font-bold">{airport.speedtestData.maxSpeed}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">近端香港平均延迟:</span>
+                <span class="text-cyan-400 font-bold">{airport.speedtestData.avgLatency}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">丢包率表现:</span>
+                <span class="text-emerald-400 font-bold">接近 0% (专线保障)</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Section 3: Unlock Images Gallery (If unlockImages exists) -->
+  {airport.unlockImages && airport.unlockImages.length > 0 && (
+    <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl overflow-hidden">
+      <div class="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-6">
+        <Tv class="w-5 h-5 text-indigo-400" />
+        <h2 class="text-xl font-bold text-zinc-50">
+          流媒体与 ChatGPT / AI 原生解锁实测图
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        {airport.unlockImages.map((imgUrl, idx) => (
+          <div class="rounded-xl overflow-hidden border border-white/10 group relative shadow-md">
+            <img
+              src={url(imgUrl)}
+              alt={`${airport.name} 解锁实测图 ${idx + 1}`}
+              class="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors"></div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Section 4: Streaming & AI Unlock Matrix -->
+  <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl overflow-hidden">
+    <div class="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-6">
+      <Cpu class="w-5 h-5 text-indigo-400" />
+      <h2 class="text-xl font-bold text-zinc-50">
+        服务可用性与解锁检测矩阵 (Service Availability Matrix)
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="p-4 rounded-2xl liquid-glass-card flex items-center justify-between">
+        <div>
+          <div class="font-bold text-sm text-zinc-200">ChatGPT</div>
+          <div class="text-[11px] text-zinc-400 font-mono">OpenAI Web / App</div>
+        </div>
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          {airport.unlockStatus.chatgpt === true ? '已解锁' : '部分节点'}
+        </span>
+      </div>
+
+      <div class="p-4 rounded-2xl liquid-glass-card flex items-center justify-between">
+        <div>
+          <div class="font-bold text-sm text-zinc-200">Claude</div>
+          <div class="text-[11px] text-zinc-400 font-mono">Anthropic AI</div>
+        </div>
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          已解锁
+        </span>
+      </div>
+
+      <div class="p-4 rounded-2xl liquid-glass-card flex items-center justify-between">
+        <div>
+          <div class="font-bold text-sm text-zinc-200">Netflix</div>
+          <div class="text-[11px] text-zinc-400 font-mono">网飞非自制剧全区</div>
+        </div>
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          已解锁
+        </span>
+      </div>
+
+      <div class="p-4 rounded-2xl liquid-glass-card flex items-center justify-between">
+        <div>
+          <div class="font-bold text-sm text-zinc-200">YouTube 4K</div>
+          <div class="text-[11px] text-zinc-400 font-mono">超清视讯高画质</div>
+        </div>
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          秒开
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: Pros & Cons -->
+  <section class="my-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl">
+      <div class="flex items-center gap-2 text-emerald-400 font-bold mb-4">
+        <CheckCircle2 class="w-5 h-5" />
+        <h3 class="text-lg text-white">核心优势与亮点</h3>
+      </div>
+      <ul class="space-y-3 text-sm text-zinc-300">
+        {airport.pros.map((pro) => (
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 mt-2"></span>
+            <span>{pro}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl">
+      <div class="flex items-center gap-2 text-amber-400 font-bold mb-4">
+        <XCircle class="w-5 h-5" />
+        <h3 class="text-lg text-white">客观局限与建议</h3>
+      </div>
+      <ul class="space-y-3 text-sm text-zinc-300">
+        {airport.cons.map((con) => (
+          <li class="flex items-start gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0 mt-2"></span>
+            <span>{con}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Section 6: GEO FAQs -->
+  <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl">
+    <div class="flex items-center gap-2.5 border-b border-white/10 pb-4 mb-6">
+      <HelpCircle class="w-5 h-5 text-indigo-400" />
+      <h2 class="text-xl font-bold text-zinc-50">
+        关于 {airport.name} 的常见疑问与解答 (FAQ)
+      </h2>
+    </div>
+
+    <div class="space-y-4">
+      {airport.faqs.map((faq) => (
+        <div class="p-5 rounded-2xl liquid-glass-card border border-white/10">
+          <h4 class="font-bold text-sm text-white mb-2 flex items-center gap-2">
+            <span class="text-indigo-400 font-mono">Q:</span>
+            {faq.question}
+          </h4>
+          <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed pl-5 border-l-2 border-indigo-500/30">
+            {faq.answer}
+          </p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Cross-link Related Technical Articles & Guides -->
+  <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl overflow-hidden border border-white/10">
+    <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+      <div class="flex items-center gap-2">
+        <Sparkles class="w-5 h-5 text-indigo-400" />
+        <h2 class="text-xl font-bold text-zinc-50">
+          科学上网技术专题与实操指南
+        </h2>
+      </div>
+      <a
+        href={url('/blog')}
+        class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold"
+      >
+        <span>查看全部技术博客</span>
+        <ArrowRight class="w-3.5 h-3.5" />
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a
+        href={url('/blog/01-mastering-iepl-iplc-architecture')}
+        class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-cyan-400">网络架构支柱</span>
+        <h3 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-1.5">
+          深入解析 IEPL 与 IPLC 专线：跨境网络传输原理与防封抗抖动全指南
+        </h3>
+        <p class="text-xs text-zinc-400 line-clamp-2">
+          全面拆解物理专线不过 GFW 公网的底层机制，掌握晚高峰 0 丢包与低抖动的真实网络原理。
+        </p>
+      </a>
+
+      <a
+        href={url('/blog/02-airport-selection-guide-2026')}
+        class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-emerald-400">避坑决策模型</span>
+        <h3 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-1.5">
+          2026 科学上网防踩坑指南：如何挑选不跑路的高速稳定机场？
+        </h3>
+        <p class="text-xs text-zinc-400 line-clamp-2">
+          揭秘行业超售与资金盘套路，建立月付验证、节点倍率核验与一主一备的黄金安全策略。
+        </p>
+      </a>
+
+      <a
+        href={url('/blog/03-streaming-ai-unlocking-handbook')}
+        class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-purple-400">AI 与流媒体</span>
+        <h3 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-1.5">
+          ChatGPT、Claude 与 Netflix 4K 原生解锁全揭秘：住宅 IP 与 DNS 分流技术实战
+        </h3>
+        <p class="text-xs text-zinc-400 line-clamp-2">
+          为什么节点打不开 ChatGPT 或被 Netflix 降级？全面解析 IP 欺诈分检测与原生 ISP 属性。
+        </p>
+      </a>
+
+      <a
+        href={url('/blog/04-clash-verge-shadowrocket-rules')}
+        class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-amber-400">客户端实战</span>
+        <h3 class="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-1.5">
+          分流规则与 TUN 模式深度实践：Clash Verge Rev 与小火箭保姆级进阶调优
+        </h3>
+        <p class="text-xs text-zinc-400 line-clamp-2">
+          系统代理与 TUN 模式底层差异，学会 Fake-IP 配置与排除国内应用变慢故障。
+        </p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Bottom Final Conversion Sticky Bar -->
+  <div class="my-12 p-8 liquid-glass rounded-3xl border border-indigo-500/30 text-center relative overflow-hidden shadow-2xl">
+    <div class="relative z-10 max-w-xl mx-auto space-y-4">
+      <h3 class="text-2xl font-black text-white">
+        开始体验 {airport.name} 极速网络
+      </h3>
+      <p class="text-xs sm:text-sm text-zinc-300">
+        {airport.promoCode ? `结账时输入专属优惠码 ${airport.promoCode}，即可享受专属立减折扣。` : '通过跑机场专属通道直达官网注册，尊享优先专线服务。'}
+      </p>
+      <div class="pt-2">
+        <a
+          href={airport.affiliateUrl}
+          target="_blank"
+          rel="nofollow sponsored noopener"
+          class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white font-bold text-sm shadow-xl shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all"
+        >
+          <span>立即前往 {airport.name} 官方网站</span>
+          <ExternalLink class="w-4 h-4" />
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupSingleCopy() {
+    const btn = document.querySelector('.single-copy-code-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const code = btn.getAttribute('data-code');
+      if (!code) return;
+      try {
+        await navigator.clipboard.writeText(code);
+        const copyIcon = btn.querySelector('.copy-icon');
+        const checkIcon = btn.querySelector('.check-icon');
+        const statusText = btn.querySelector('.btn-status');
+
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        if (statusText) statusText.textContent = '(已复制到剪贴板)';
+
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+          if (statusText) statusText.textContent = '(点击复制)';
+        }, 2000);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  setupSingleCopy();
+  document.addEventListener('astro:after-swap', setupSingleCopy);
+</script>

@@ -1,39 +1,38 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroMagazineCover from '../components/ui/HeroMagazineCover.astro';
+import AirportCard from '../components/airport/AirportCard.astro';
 import PostCard from '../components/ui/PostCard.astro';
-import TagBadge from '../components/ui/TagBadge.astro';
 import siteConfig from '../config/site';
 import { url } from '../utils/paths';
+import { airportsData, getAirportBySlug } from '../data/airports';
 import { getCollection } from 'astro:content';
-import { ArrowRight, Sparkles, Layers, Zap, Code, Terminal, Github } from 'lucide-astro';
+import {
+  ArrowRight,
+  Sparkles,
+  ExternalLink,
+  Activity,
+  Download,
+  Copy,
+  Check,
+  CheckCircle2,
+} from 'lucide-astro';
+
+const allAirports = airportsData;
+const guangshuyun = getAirportBySlug('guangshuyun') || allAirports[0];
 
 const allPosts = await getCollection('blog');
 const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const featuredPost = sortedPosts[0];
-const recentPosts = sortedPosts.slice(1);
-
-const categories = siteConfig.categories.map((cat) => ({
-  name: cat.name,
-  desc: cat.desc,
-  count: sortedPosts.filter((p) => p.data.category.toLowerCase() === cat.name.toLowerCase()).length,
-}));
-
-const allTags = [...new Set(sortedPosts.flatMap((p) => p.data.tags || []))];
-
-const ui = siteConfig.ui || {
-  latestPostsBadge: 'Recent Writing',
-  latestPostsTitle: 'Latest Notes & Deep Dives',
-  categoriesTitle: 'Browse by Topic',
-  tagsTitle: 'Popular Tags',
-};
+const recentPosts = sortedPosts.slice(0, 3);
 ---
 
-<BaseLayout>
-  <!-- Personal Intro Hero Banner -->
-  <section class="mb-8 sm:mb-12 p-6 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden group">
+<BaseLayout
+  title={`${siteConfig.title}`}
+  description={`${siteConfig.description}`}
+>
+  <!-- Hero Section (保留原主题头像 UI 视觉与高质感空间美学) -->
+  <section class="mb-12 p-6 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden group">
     <!-- Ambient Internal Smooth Radial Glow -->
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.2),rgba(6,182,212,0.1)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.22),rgba(6,182,212,0.12)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
 
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center relative z-10">
       <div class="md:col-span-8 lg:col-span-9 order-2 md:order-1">
@@ -44,155 +43,282 @@ const ui = siteConfig.ui || {
         </div>
 
         <!-- Main Headline -->
-        <h1 class="text-2xl sm:text-5xl lg:text-6xl font-extrabold text-zinc-50 tracking-tight leading-[1.15] mb-4 sm:mb-5">
-          {siteConfig.hero.greeting} <span class="inline-block animate-bounce">👋</span>
+        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-50 tracking-tight leading-[1.2] mb-4 sm:mb-5">
+          {siteConfig.hero.greeting} <span class="inline-block animate-bounce">⚡</span>
         </h1>
 
-        <p class="text-sm sm:text-lg text-zinc-300 font-normal leading-relaxed mb-6 sm:mb-8 max-w-2xl">
+        <p class="text-sm sm:text-base text-zinc-300 font-normal leading-relaxed mb-6 sm:mb-8 max-w-2xl">
           {siteConfig.hero.tagline}
         </p>
 
         <!-- Quick Action Buttons -->
         <div class="flex flex-wrap items-center gap-3">
           <a
-            href={url(siteConfig.hero.primaryButton.href)}
+            href={url('/airports')}
             class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all w-full sm:w-auto text-center"
           >
-            <span>{siteConfig.hero.primaryButton.text}</span>
+            <span>进入 42 家机场品牌大厅</span>
             <ArrowRight class="w-4 h-4" />
           </a>
 
           <a
-            href={url(siteConfig.hero.secondaryButton.href)}
+            href={url('/speedtest')}
             class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full liquid-pill hover:border-indigo-400/40 text-zinc-200 text-xs sm:text-sm font-semibold hover:scale-[1.02] transition-all w-full sm:w-auto text-center"
           >
-            <span>{siteConfig.hero.secondaryButton.text}</span>
+            <Activity class="w-4 h-4 text-cyan-400" />
+            <span>实测测速报告大厅</span>
           </a>
 
-          {siteConfig.author.social.github && (
-            <a
-              href={siteConfig.author.social.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-full liquid-pill hover:border-indigo-400/40 text-zinc-400 hover:text-indigo-300 text-xs sm:text-sm font-semibold transition-all w-full sm:w-auto text-center"
-              title="GitHub"
-            >
-              <Github class="w-4 h-4" />
-              <span>GitHub</span>
-            </a>
-          )}
+          <a
+            href={url('/clients')}
+            class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full liquid-pill hover:border-indigo-400/40 text-zinc-200 text-xs sm:text-sm font-semibold hover:scale-[1.02] transition-all w-full sm:w-auto text-center"
+          >
+            <Download class="w-4 h-4 text-indigo-400" />
+            <span>全平台客户端教程</span>
+          </a>
         </div>
       </div>
 
-      <!-- Author Portrait Avatar -->
+      <!-- Author Portrait Avatar (严格保留原主题头像视觉) -->
       <div class="flex md:col-span-4 lg:col-span-3 justify-start md:justify-end order-1 md:order-2">
         <div class="relative group/avatar">
           <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 rounded-2xl sm:rounded-3xl blur-md opacity-35 group-hover/avatar:opacity-70 transition duration-500"></div>
           <img
             src={url(siteConfig.author.avatar)}
             alt={siteConfig.author.name}
-            class="relative w-20 h-20 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/20 shadow-2xl transition-transform duration-500 group-hover/avatar:scale-105"
+            class="relative w-24 h-24 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl sm:rounded-3xl object-cover border-2 border-white/20 shadow-2xl transition-transform duration-500 group-hover/avatar:scale-105"
           />
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Featured Post Spotlight Section -->
-  {featuredPost && <HeroMagazineCover post={featuredPost} />}
+  <!-- Giant Spotlight: 第一主推 - 光速云 (High Conversion Spotlight) -->
+  <section class="my-12">
+    <div class="liquid-glass rounded-3xl p-6 sm:p-10 lg:p-12 shadow-2xl border-2 border-indigo-500/40 relative overflow-hidden">
+      <!-- Glow ambient -->
+      <div class="absolute -top-24 -right-24 w-80 h-80 bg-gradient-to-br from-cyan-400/25 via-indigo-500/30 to-purple-600/25 blur-3xl pointer-events-none rounded-full"></div>
 
-  <!-- Section Header: Latest Articles -->
-  <section class="mt-14 mb-8">
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/20 dark:border-white/10 pb-4 mb-8">
-      <div>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 mb-2">
-          <Sparkles class="w-3.5 h-3.5" />
-          {ui.latestPostsBadge}
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+        <div class="lg:col-span-8">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-slate-950 shadow-md">
+              <Sparkles class="w-3.5 h-3.5" />
+              跑机场年度第一主力推荐
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+              IEPL专线 + 内网双架构
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-mono liquid-pill text-zinc-300">
+              2020年稳定运营
+            </span>
+          </div>
+
+          <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+            光速云 — 极速稳定专线与超高性价比之选
+          </h2>
+
+          <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6 max-w-2xl">
+            光速云采用 <strong>IEPL 专线 + 企业级内网专线</strong> 双线路保障，融合现代化 <strong>VLESS</strong> 协议。香港节点晚高峰实测高达 <strong>529Mbps</strong>，延迟低至 <strong>22ms</strong>。配备自研一键客户端，并支持 Clash / 小火箭等主流订阅。
+          </p>
+
+          <!-- Core Feature Bullets -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-xs sm:text-sm text-zinc-200">
+            <div class="flex items-center gap-2">
+              <CheckCircle2 class="w-4 h-4 text-emerald-400 shrink-0" />
+              <span><strong>优惠码 AMM</strong>：年付轻量折合约 <strong>8 元/月</strong></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CheckCircle2 class="w-4 h-4 text-emerald-400 shrink-0" />
+              <span><strong>斯诺克 147 永久套餐</strong>：¥147 给 247GB 不限时不过期</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CheckCircle2 class="w-4 h-4 text-emerald-400 shrink-0" />
+              <span><strong>多国优质节点</strong>：香港×20、台湾×5、日新美欧巴等</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <CheckCircle2 class="w-4 h-4 text-emerald-400 shrink-0" />
+              <span><strong>流媒体全解锁</strong>：Netflix、Disney+、YouTube 4K 秒开</span>
+            </div>
+          </div>
+
+          <!-- Action and Promo Code Bar -->
+          <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-white/10">
+            <a
+              href={guangshuyun.affiliateUrl}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              class="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              <span>立即直达光速云官网开通</span>
+              <ExternalLink class="w-4 h-4" />
+            </a>
+
+            <button
+              type="button"
+              class="single-copy-code-btn inline-flex items-center gap-2 px-5 py-3.5 rounded-full liquid-pill hover:border-indigo-400/50 text-indigo-300 text-xs sm:text-sm font-mono font-semibold transition-all cursor-pointer"
+              data-code="AMM"
+            >
+              <Copy class="w-4 h-4 copy-icon" />
+              <Check class="w-4 h-4 check-icon hidden text-emerald-400" />
+              <span>独家优惠码: <strong>AMM</strong></span>
+              <span class="btn-status text-zinc-400 text-xs ml-1">(点击复制)</span>
+            </button>
+
+            <a
+              href={url('/airports/guangshuyun')}
+              class="text-xs font-semibold text-zinc-400 hover:text-indigo-300 underline underline-offset-4 transition-colors"
+            >
+              查看光速云完整测评与测速图 →
+            </a>
+          </div>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
-          {ui.latestPostsTitle}
+
+        <!-- Spotlight Right Card: Real speed data snapshot -->
+        <div class="lg:col-span-4">
+          <div class="p-6 rounded-3xl liquid-glass-card border border-white/10 shadow-xl space-y-4 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <span class="text-zinc-400">实测最高带宽</span>
+              <span class="text-base font-black text-emerald-400">529 Mbps</span>
+            </div>
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <span class="text-zinc-400">香港平均延迟</span>
+              <span class="text-base font-black text-cyan-400">22 ms</span>
+            </div>
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <span class="text-zinc-400">协议与架构</span>
+              <span class="text-zinc-200">IEPL 专线 / VLESS</span>
+            </div>
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <span class="text-zinc-400">入门起步成本</span>
+              <span class="text-emerald-400 font-bold">折合 ¥8/月 (年付99元)</span>
+            </div>
+            <div class="pt-1 text-center">
+              <a
+                href={url('/airports/guangshuyun')}
+                class="block w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-all text-xs"
+              >
+                查看节点测速图与解锁报告
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 42 Airport Ranking & Directory Section -->
+  <section id="top10" class="my-16 scroll-mt-24">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-4 mb-8">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-2">
+          <Sparkles class="w-3.5 h-3.5 text-cyan-400" />
+          全网 42 家实测梯队大厅
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-zinc-50 tracking-tight">
+          2026 全球 42 家机场综合排行榜与选购大厅
         </h2>
       </div>
 
-      <!-- View All Link -->
+      <div class="text-xs text-zinc-400 font-mono">
+        已收录并实测：<strong class="text-emerald-400">{allAirports.length}</strong> 家优质服务商
+      </div>
+    </div>
+
+    <!-- Airport Grid: All 42 airports displayed! -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {allAirports.map((airport) => (
+        <AirportCard airport={airport} />
+      ))}
+    </div>
+  </section>
+
+  <!-- Speedtest & Observatory Promo Banner -->
+  <section class="my-16 p-8 sm:p-10 liquid-glass rounded-3xl shadow-xl border border-white/10 relative overflow-hidden">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+      <div class="md:col-span-8 space-y-3">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-400/20">
+          <Activity class="w-3.5 h-3.5" />
+          网络实测实验室
+        </div>
+        <h3 class="text-2xl sm:text-3xl font-black text-white">
+          查看 17+ 家机场真实晚高峰测速大图与解锁实测
+        </h3>
+        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl">
+          拒绝口头虚标。我们收录了 SOGO云、U1S1、二猫云、飞猫云、光年梯、极连云、可信云、快狸、灵猫、全球云、速界、唯兔云等品牌的完整节点测速图与流媒体/ChatGPT 原生解锁报告。
+        </p>
+      </div>
+
+      <div class="md:col-span-4 flex justify-start md:justify-end">
+        <a
+          href={url('/speedtest')}
+          class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-500/25 hover:scale-105 transition-all cursor-pointer"
+        >
+          <span>进入测速实测大厅</span>
+          <ArrowRight class="w-4 h-4" />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Articles Section (保留原主题博客系统与精选文章) -->
+  <section class="my-16">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-4 mb-8">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-2">
+          技术指南与架构实战
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-zinc-50 tracking-tight">
+          网络工程与科学上网指南
+        </h2>
+      </div>
+
       <a
         href={url('/blog')}
-        class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors"
+        class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors"
       >
-        <span>View All Articles ({allPosts.length})</span>
+        <span>浏览全部技术笔记 ({allPosts.length})</span>
         <ArrowRight class="w-4 h-4" />
       </a>
     </div>
 
-    <!-- Posts Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {recentPosts.map((post) => (
         <PostCard post={post} />
       ))}
     </div>
   </section>
-
-  <!-- Categories & Tags Section -->
-  <section class="my-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
-    <!-- Categories (7 cols) -->
-    <div class="lg:col-span-7 liquid-glass rounded-3xl p-7 sm:p-8 shadow-lg">
-      <div class="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-4 mb-6">
-        <div class="flex items-center gap-2.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500"></span>
-          <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-            {ui.categoriesTitle}
-          </h3>
-        </div>
-        <span class="text-xs font-mono text-zinc-400">CATEGORIES</span>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {categories.map((cat) => (
-          <a
-            href={url(`/categories/${cat.name.toLowerCase()}`)}
-            class="group p-5 rounded-2xl liquid-glass-card hover:scale-[1.02] flex flex-col justify-between transition-all"
-          >
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-base font-bold text-zinc-900 dark:text-zinc-50 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                {cat.name}
-              </span>
-              <span class="w-7 h-7 rounded-full liquid-pill flex items-center justify-center font-mono text-xs font-bold text-indigo-600 dark:text-indigo-300">
-                {cat.count}
-              </span>
-            </div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-              {cat.desc}
-            </p>
-          </a>
-        ))}
-      </div>
-    </div>
-
-    <!-- Tags Pill Cloud (5 cols) -->
-    <div class="lg:col-span-5 liquid-glass rounded-3xl p-7 sm:p-8 shadow-lg flex flex-col justify-between">
-      <div>
-        <div class="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-4 mb-6">
-          <div class="flex items-center gap-2.5">
-            <span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"></span>
-            <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-              {ui.tagsTitle}
-            </h3>
-          </div>
-          <span class="font-mono text-xs text-zinc-400">#TAGS</span>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          {allTags.map((tag) => (
-            <TagBadge tag={tag} size="sm" />
-          ))}
-        </div>
-      </div>
-
-      <div class="mt-6 pt-4 border-t border-white/15 dark:border-white/10 flex justify-between items-center text-xs text-zinc-400 font-mono">
-        <span>TOTAL TOPICS: {allTags.length}</span>
-        <span class="text-indigo-600 dark:text-indigo-400 font-semibold">Digital Garden</span>
-      </div>
-    </div>
-  </section>
 </BaseLayout>
 
+<script>
+  function setupSingleCopy() {
+    document.querySelectorAll('.single-copy-code-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const code = btn.getAttribute('data-code');
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code);
+          const copyIcon = btn.querySelector('.copy-icon');
+          const checkIcon = btn.querySelector('.check-icon');
+          const statusText = btn.querySelector('.btn-status');
+
+          copyIcon?.classList.add('hidden');
+          checkIcon?.classList.remove('hidden');
+          if (statusText) statusText.textContent = '(已复制)';
+
+          setTimeout(() => {
+            copyIcon?.classList.remove('hidden');
+            checkIcon?.classList.add('hidden');
+            if (statusText) statusText.textContent = '(点击复制)';
+          }, 2000);
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    });
+  }
+
+  setupSingleCopy();
+  document.addEventListener('astro:after-swap', setupSingleCopy);
+</script>

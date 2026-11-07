@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AirportCard from '../../components/airport/AirportCard.astro';
+import { airportsData } from '../../data/airports';
+import { ShieldCheck, Search, Sparkles } from 'lucide-astro';
+
+const totalAirports = airportsData.length;
+const ieplCount = airportsData.filter((a) => a.lineType.includes('IEPL') || a.lineType.includes('IPLC')).length;
+const budgetCount = airportsData.filter((a) => a.minPriceNum <= 10).length;
+const speedtestCount = airportsData.filter((a) => a.speedtestImage || (a.unlockImages && a.unlockImages.length > 0)).length;
+---
+
+<BaseLayout
+  title="42家机场品牌库大全 | 2026节点测速、IEPL专线对比与优惠码汇总 — 跑机场"
+  description="跑机场 (paojichang.blog) 收录并实测 42 家主流机场服务商。提供价格对比、IEPL内网专线排查、ChatGPT与Netflix解锁测试、测速图报告与独家折扣优惠码。"
+>
+  <!-- Hero Section -->
+  <div class="mb-10 p-7 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.2),rgba(6,182,212,0.1)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-3">
+        <Sparkles class="w-3.5 h-3.5 text-cyan-400" />
+        42 家品牌全维度数据库
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-50 tracking-tight leading-tight mb-4">
+        2026 机场品牌大厅与对比选购
+      </h1>
+
+      <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6">
+        基于网络实验室真实晚高峰测速、协议架构与流媒体解锁实测。已整理 42 家机场的官方直达注册通道、独家立减优惠码及详细套餐规格，拒绝虚标跑路。
+      </p>
+
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10 font-mono text-xs">
+        <div>
+          <div class="text-zinc-400">已收录品牌</div>
+          <div class="text-lg font-bold text-white">{totalAirports} 家</div>
+        </div>
+        <div>
+          <div class="text-zinc-400">IEPL/IPLC 专线</div>
+          <div class="text-lg font-bold text-indigo-400">{ieplCount} 家</div>
+        </div>
+        <div>
+          <div class="text-zinc-400">¥10 以下平价</div>
+          <div class="text-lg font-bold text-emerald-400">{budgetCount} 家</div>
+        </div>
+        <div>
+          <div class="text-zinc-400">带测速图实测</div>
+          <div class="text-lg font-bold text-cyan-400">{speedtestCount} 家</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Realtime Search and Filter Toolbar -->
+  <div class="sticky top-20 z-40 mb-8 p-4 liquid-glass rounded-2xl shadow-lg border border-white/10">
+    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <Search class="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <input
+          id="airport-search-input"
+          type="text"
+          placeholder="按名称、专线、协议（如 光速云、IEPL、VLESS、AMM）即时搜索..."
+          class="w-full pl-10 pr-4 py-2.5 rounded-full liquid-pill text-white text-xs sm:text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-xs"
+        />
+      </div>
+
+      <!-- Quick Filter Pills -->
+      <div class="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" id="filter-buttons">
+        <button
+          type="button"
+          data-filter="all"
+          class="filter-btn active px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white shadow-xs cursor-pointer transition-all"
+        >
+          全部 ({totalAirports})
+        </button>
+        <button
+          type="button"
+          data-filter="iepl"
+          class="filter-btn px-3.5 py-1.5 rounded-full text-xs font-semibold liquid-pill text-zinc-300 hover:text-white cursor-pointer transition-all"
+        >
+          IEPL/IPLC 专线
+        </button>
+        <button
+          type="button"
+          data-filter="budget"
+          class="filter-btn px-3.5 py-1.5 rounded-full text-xs font-semibold liquid-pill text-zinc-300 hover:text-white cursor-pointer transition-all"
+        >
+          平价入门 (≤¥10)
+        </button>
+        <button
+          type="button"
+          data-filter="speedtest"
+          class="filter-btn px-3.5 py-1.5 rounded-full text-xs font-semibold liquid-pill text-zinc-300 hover:text-white cursor-pointer transition-all"
+        >
+          带测速图实测 ({speedtestCount})
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Airport Cards Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="airport-grid">
+    {airportsData.map((airport) => (
+      <AirportCard airport={airport} />
+    ))}
+  </div>
+
+  <!-- Empty State (hidden by default) -->
+  <div id="no-results-box" class="hidden my-16 p-12 text-center liquid-glass rounded-3xl">
+    <p class="text-base text-zinc-300 mb-2 font-bold">未找到匹配的机场服务商</p>
+    <p class="text-xs text-zinc-500">建议尝试其他关键词（例如：光速云、IEPL、VLESS、月付）或重置筛选条件。</p>
+    <button
+      id="reset-filter-btn"
+      type="button"
+      class="mt-4 px-5 py-2 rounded-full liquid-pill text-indigo-400 text-xs font-semibold hover:border-indigo-400/40 cursor-pointer"
+    >
+      重置所有筛选
+    </button>
+  </div>
+
+  <!-- Compliance and Transparency Notice -->
+  <div class="mt-14 p-6 liquid-glass rounded-2xl border border-white/10 text-xs text-zinc-400 leading-relaxed font-mono">
+    <div class="flex items-center gap-2 text-zinc-200 font-bold mb-1.5">
+      <ShieldCheck class="w-4 h-4 text-emerald-400" />
+      <span>跑机场合规透明声明</span>
+    </div>
+    <p>
+      本页面所有机场注册链接均为官方直达推荐链接，包含 <code>target="_blank" rel="nofollow sponsored noopener"</code> 标准规范。通过本站链接注册可能为实验室带来维护支持，但不影响用户实际支付价格。建议所有用户优先按月订阅或选择小额套餐，实测晚高峰满意后再行续费。
+    </p>
+  </div>
+</BaseLayout>
+
+<script>
+  function setupAirportFiltering() {
+    const searchInput = document.getElementById('airport-search-input') as HTMLInputElement | null;
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll<HTMLElement>('[data-airport-card]');
+    const noResultsBox = document.getElementById('no-results-box');
+    const resetBtn = document.getElementById('reset-filter-btn');
+
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    function filterCards() {
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const name = (card.getAttribute('data-name') || '').toLowerCase();
+        const lineType = (card.getAttribute('data-linetype') || '').toLowerCase();
+        const price = parseFloat(card.getAttribute('data-price') || '999');
+        const tags = (card.getAttribute('data-tags') || '').toLowerCase();
+        const textContent = card.textContent?.toLowerCase() || '';
+
+        // Matches filter category
+        let matchesCategory = true;
+        if (currentFilter === 'iepl') {
+          matchesCategory = lineType.includes('iepl') || lineType.includes('iplc') || tags.includes('专线');
+        } else if (currentFilter === 'budget') {
+          matchesCategory = price <= 10;
+        } else if (currentFilter === 'speedtest') {
+          matchesCategory = tags.includes('测速') || tags.includes('图');
+        }
+
+        // Matches search query
+        let matchesSearch = true;
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase().trim();
+          matchesSearch = name.includes(q) || lineType.includes(q) || tags.includes(q) || textContent.includes(q);
+        }
+
+        if (matchesCategory && matchesSearch) {
+          card.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      if (noResultsBox) {
+        if (visibleCount === 0) {
+          noResultsBox.classList.remove('hidden');
+        } else {
+          noResultsBox.classList.add('hidden');
+        }
+      }
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      searchQuery = (e.target as HTMLInputElement).value;
+      filterCards();
+    });
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach((b) => {
+          b.classList.remove('active', 'bg-gradient-to-r', 'from-cyan-500', 'via-indigo-600', 'to-purple-600', 'text-white');
+          b.classList.add('liquid-pill', 'text-zinc-300');
+        });
+        btn.classList.add('active', 'bg-gradient-to-r', 'from-cyan-500', 'via-indigo-600', 'to-purple-600', 'text-white');
+        btn.classList.remove('liquid-pill', 'text-zinc-300');
+
+        currentFilter = btn.getAttribute('data-filter') || 'all';
+        filterCards();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      currentFilter = 'all';
+      filterButtons[0]?.dispatchEvent(new Event('click'));
+    });
+  }
+
+  setupAirportFiltering();
+  document.addEventListener('astro:after-swap', setupAirportFiltering);
+</script>

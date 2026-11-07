@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="avatar-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="50%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#311042"/>
+    </linearGradient>
+    <linearGradient id="avatar-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="50%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C084FC"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#6366F1" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect width="200" height="200" rx="48" fill="url(#avatar-bg)"/>
+  <circle cx="100" cy="100" r="76" stroke="url(#avatar-accent)" stroke-width="2" fill="none" opacity="0.4"/>
+  <circle cx="100" cy="74" r="32" fill="url(#avatar-accent)" filter="url(#shadow)"/>
+  <path d="M46 160 C46 128 70 114 100 114 C130 114 154 128 154 160 Z" fill="url(#avatar-accent)" filter="url(#shadow)"/>
+</svg>

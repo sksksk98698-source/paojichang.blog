@@ -149,7 +149,7 @@ Used for dialogue, quotes, multi-persona debates, or conversational discussions.
   "How do we handle real-time search without introducing heavy client-side search libraries?"
 </SpeechBubble>
 
-<SpeechBubble speaker="Alex Morgan" role="Software Engineer" avatar="⚡" side="right" variant="shout">
+<SpeechBubble speaker="泡机场工程师" role="全栈工程师" avatar="⚡" side="right" variant="shout">
   "Pagefind compiles static indexes at build time! The client search library is only 8KB."
 </SpeechBubble>
 
@@ -174,7 +174,7 @@ Used for author commentary, tips, and personal remarks.
 #### Example:
 
 ```mdx
-<CharacterAside name="Alex Morgan" role="Author" avatar="/images/avatar.jpg">
+<CharacterAside name="泡机场架构师" role="作者" avatar="/images/avatar.svg">
   "When designing animations, always prefer `cubic-bezier(0.16, 1, 0.3, 1)` for fluid, natural spring dynamics."
 </CharacterAside>
 ```

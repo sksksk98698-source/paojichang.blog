@@ -1,8 +1,7 @@
 ---
-import TagBadge from './TagBadge.astro';
 import siteConfig from '../../config/site';
 import { url } from '../../utils/paths';
-import { ArrowRight, Calendar, User, Clock, Sparkles } from 'lucide-astro';
+import { ArrowRight, Calendar, User, Sparkles } from 'lucide-astro';
 
 interface Props {
   post: any;
@@ -11,7 +10,7 @@ interface Props {
 const { post } = Astro.props;
 const data = post.data;
 const slug = post.id.replace(/\.(md|mdx)$/, '');
-const authorName = siteConfig.author.name;
+const authorName = data.author || siteConfig.author.name;
 const authorAvatar = siteConfig.author.avatar;
 const postUrl = url(`/blog/${slug}`);
 ---
@@ -28,7 +27,7 @@ const postUrl = url(`/blog/${slug}`);
         <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-cyan-500/15 to-indigo-500/15 text-indigo-300 border border-indigo-400/25 shadow-xs">
             <Sparkles class="w-3.5 h-3.5 text-indigo-400" />
-            Featured Article
+            本期头条精选
           </span>
           <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold liquid-pill text-zinc-300">
             {data.category}
@@ -63,13 +62,15 @@ const postUrl = url(`/blog/${slug}`);
                   class="w-6 h-6 rounded-full object-cover border border-white/10 shrink-0"
                 />
               ) : (
-                <User class="w-3.5 h-3.5 text-indigo-500" />
+                <User class="w-3.5 h-3.5 text-indigo-400" />
               )}
               <span>{authorName}</span>
             </div>
             <div class="flex items-center gap-1.5">
               <Calendar class="w-3.5 h-3.5 text-zinc-400" />
-              <span>{new Date(data.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <time datetime={data.pubDate.toISOString()}>
+                {new Date(data.pubDate).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </time>
             </div>
           </div>
 
@@ -77,7 +78,7 @@ const postUrl = url(`/blog/${slug}`);
             href={postUrl}
             class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all w-full sm:w-auto text-center"
           >
-            <span>Read Article</span>
+            <span>阅读深度解析</span>
             <ArrowRight class="w-4 h-4" />
           </a>
         </div>
@@ -87,7 +88,7 @@ const postUrl = url(`/blog/${slug}`);
         <div class="lg:col-span-5 flex items-center justify-center self-center lg:-translate-y-6">
           <a
             href={postUrl}
-            class="block w-full rounded-2xl overflow-hidden border border-white/25 dark:border-white/10 shadow-xl group/img relative"
+            class="block w-full rounded-2xl overflow-hidden border border-white/20 shadow-xl group/img relative"
           >
             <img
               src={url(data.heroImage)}

@@ -2,29 +2,30 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import siteConfig from '../config/site';
 import { url } from '../utils/paths';
-import { Home, Compass, Search, ArrowLeft, Terminal, Sparkles } from 'lucide-astro';
+import { Home, Compass, Search, Terminal, Sparkles } from 'lucide-astro';
+
 const notFound = siteConfig.notFound || {
   badge: 'HTTP_STATUS // 404_NOT_FOUND',
-  title: 'Page Lost in the Stream',
+  title: '访问的节点或路径已迷失',
   description:
-    "The route, article, or resource you were looking for doesn't exist, has been moved, or is currently being rewritten.",
-  homeButtonText: 'Return Home',
-  browseButtonText: 'Browse Articles',
+    '该页面可能已被迁移、重命名，或者处于维护重构状态中。',
+  homeButtonText: '返回站点首页',
+  browseButtonText: '检索所有文章',
 };
 ---
 
 <BaseLayout
-  title={`404: Page Not Found — ${siteConfig.name}`}
-  description="The requested page or publication could not be found."
+  title={`404: 页面未找到 — ${siteConfig.name}`}
+  description="所访问的技术文章或资源路由不存在。"
 >
-  <main class="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex flex-col items-center justify-center text-center">
+  <div class="flex-1 max-w-5xl mx-auto py-12 sm:py-20 flex flex-col items-center justify-center text-center">
     <!-- Main Liquid Glass 404 Hero Container -->
-    <div class="w-full max-w-2xl liquid-glass rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl border border-white/20 dark:border-white/10">
+    <div class="w-full max-w-2xl liquid-glass rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl border border-white/10">
       <!-- Ambient Backlight Glow -->
       <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-72 h-72 bg-gradient-to-tr from-cyan-500/25 via-indigo-500/30 to-purple-500/25 blur-3xl pointer-events-none rounded-full" aria-hidden="true"></div>
 
       <!-- Top Pill Badge -->
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-pill text-indigo-600 dark:text-indigo-400 text-xs font-mono font-semibold mb-6 border border-indigo-400/20">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-pill text-indigo-400 text-xs font-mono font-semibold mb-6 border border-indigo-400/20">
         <Terminal class="w-3.5 h-3.5" />
         <span>{notFound.badge}</span>
       </div>
@@ -40,12 +41,12 @@ const notFound = siteConfig.notFound || {
       </div>
 
       <!-- Heading -->
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight mb-3">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-zinc-100 tracking-tight mb-3">
         {notFound.title}
       </h2>
 
       <!-- Description -->
-      <p class="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 max-w-md mx-auto leading-relaxed mb-8">
+      <p class="text-sm sm:text-base text-zinc-300 max-w-md mx-auto leading-relaxed mb-8">
         {notFound.description}
       </p>
 
@@ -61,7 +62,7 @@ const notFound = siteConfig.notFound || {
 
         <a
           href={url('/blog')}
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-full liquid-pill text-zinc-800 dark:text-zinc-200 font-semibold text-xs sm:text-sm hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full liquid-pill text-zinc-200 font-semibold text-xs sm:text-sm hover:text-indigo-400 hover:border-indigo-400/40 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
         >
           <Compass class="w-4 h-4" />
           <span>{notFound.browseButtonText}</span>
@@ -70,24 +71,24 @@ const notFound = siteConfig.notFound || {
         <button
           id="trigger-search-404"
           type="button"
-          class="inline-flex items-center gap-2 px-5 py-3 rounded-full liquid-pill text-zinc-700 dark:text-zinc-300 font-semibold text-xs sm:text-sm hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400/40 transition-all cursor-pointer"
+          class="inline-flex items-center gap-2 px-5 py-3 rounded-full liquid-pill text-zinc-300 font-semibold text-xs sm:text-sm hover:text-indigo-400 hover:border-indigo-400/40 transition-all cursor-pointer"
         >
           <Search class="w-4 h-4" />
-          <span>Search (⌘K)</span>
+          <span>全站搜索 (⌘K)</span>
         </button>
       </div>
 
       <!-- Topic Shortcuts -->
-      <div class="pt-6 border-t border-white/20 dark:border-white/10">
+      <div class="pt-6 border-t border-white/10">
         <div class="text-xs font-mono text-zinc-400 mb-3 flex items-center justify-center gap-1.5">
           <Sparkles class="w-3.5 h-3.5 text-indigo-400" />
-          <span>POPULAR EXPLORATION TOPICS</span>
+          <span>热门技术探索分类</span>
         </div>
         <div class="flex flex-wrap justify-center gap-2">
           {siteConfig.categories.map((cat) => (
             <a
               href={url(`/categories/${cat.name.toLowerCase()}`)}
-              class="px-3 py-1 rounded-full text-xs font-medium liquid-pill text-zinc-700 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400/40 transition-all"
+              class="px-3 py-1 rounded-full text-xs font-medium liquid-pill text-zinc-300 hover:text-indigo-400 hover:border-indigo-400/40 transition-all"
             >
               #{cat.name}
             </a>
@@ -95,7 +96,7 @@ const notFound = siteConfig.notFound || {
         </div>
       </div>
     </div>
-  </main>
+  </div>
 
   <script>
     document.getElementById('trigger-search-404')?.addEventListener('click', () => {

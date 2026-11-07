@@ -1,0 +1,200 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSpeedtestAirports } from '../../data/airports';
+import { url } from '../../utils/paths';
+import { Activity, ArrowRight, ExternalLink, Zap } from 'lucide-astro';
+
+const speedtestList = getSpeedtestAirports();
+---
+
+<BaseLayout
+  title="2026机场真实节点测速与流媒体解锁实测报告大厅 — 跑机场"
+  description="跑机场网络实验室权威发布：收录光速云、暮光加速、飞猫云、二猫云等重点机场真实 MAI-TEST 与 Speedtest 晚高峰全节点测速大图及 Netflix/ChatGPT 解锁报告。"
+>
+  <!-- Header -->
+  <div class="mb-10 p-7 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.2),rgba(6,182,212,0.1)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-3">
+        <Activity class="w-3.5 h-3.5 text-cyan-400" />
+        网络可观测性实验室 (Network Observatory)
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-50 tracking-tight leading-tight mb-4">
+        2026 机场节点实测大图与解锁报告
+      </h1>
+
+      <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6">
+        拒绝口头承诺与跑分作弊。跑机场收集并展示各品牌在真实网络环境下的单机晚高峰全节点测速图与流媒体 AI 解锁截图，提供客观、独立的数据参考。
+      </p>
+
+      <div class="flex items-center gap-4 text-xs font-mono text-zinc-400 pt-4 border-t border-white/10">
+        <div>实测已归档品牌：<strong class="text-cyan-400">{speedtestList.length}</strong> 家</div>
+        <div>测试工具家族：<strong class="text-zinc-200">MAI-TEST-BOT / Speedtest</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speedtest Showcase List -->
+  <div class="space-y-12">
+    {speedtestList.map((airport) => (
+      <section class="p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl overflow-hidden border border-white/10">
+        <!-- Airport Header Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5 mb-6">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full font-mono font-bold text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
+              #{airport.rank}
+            </span>
+            <div>
+              <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                <span>{airport.name}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/20 font-mono font-normal">
+                  {airport.lineType}
+                </span>
+              </h2>
+              <div class="text-xs text-zinc-400 font-mono mt-0.5">
+                起步价格：<strong class="text-emerald-400">{airport.minPrice}</strong>
+                {airport.promoCode && <span> · 优惠码: <strong class="text-indigo-300">{airport.promoCode}</strong></span>}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a
+              href={url(`/airports/${airport.slug}`)}
+              class="px-4 py-2 rounded-full liquid-pill hover:border-indigo-400/50 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition-all"
+            >
+              <span>查看完整测评</span>
+              <ArrowRight class="w-3.5 h-3.5" />
+            </a>
+            <a
+              href={airport.affiliateUrl}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+              class="px-4 py-2 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/25 hover:scale-105 transition-all flex items-center gap-1"
+            >
+              <span>官网直达</span>
+              <ExternalLink class="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+
+        <!-- Speedtest Image & Analysis Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {airport.speedtestImage && (
+            <div class="lg:col-span-8 rounded-2xl overflow-hidden border border-white/10 shadow-xl bg-black/40 group relative">
+              <img
+                src={url(airport.speedtestImage)}
+                alt={`${airport.name} 测速报告`}
+                class="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+                loading="lazy"
+              />
+              <div class="absolute bottom-2 right-2 px-2.5 py-1 rounded bg-black/80 text-[10px] text-zinc-300 font-mono">
+                晚高峰全节点实测
+              </div>
+            </div>
+          )}
+
+          <div class={airport.speedtestImage ? 'lg:col-span-4 space-y-4' : 'lg:col-span-12 space-y-4'}>
+            <!-- Fast Metrics -->
+            <div class="p-5 rounded-2xl liquid-glass-card border border-white/10 font-mono text-xs space-y-3">
+              <div class="text-xs uppercase text-zinc-400 font-bold border-b border-white/10 pb-2 flex items-center gap-1.5">
+                <Zap class="w-3.5 h-3.5 text-amber-400" />
+                <span>实测特征指标</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">网络协议:</span>
+                <span class="text-zinc-200">{airport.protocols.join(', ')}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">ChatGPT 解锁:</span>
+                <span class="text-emerald-400">{airport.unlockStatus.chatgpt ? '✅ 支持' : '⚠️ 视节点'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">Netflix 解锁:</span>
+                <span class="text-emerald-400">✅ 原创全区</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-zinc-400">YouTube 4K:</span>
+                <span class="text-cyan-400">✅ 极速秒开</span>
+              </div>
+            </div>
+
+            <!-- Highlights -->
+            <div class="p-5 rounded-2xl liquid-glass-card border border-white/10 text-xs text-zinc-300 space-y-2">
+              <div class="font-bold text-white mb-1">推荐点评：</div>
+              <p class="leading-relaxed">
+                {airport.highlights[0]}。在晚高峰测试中，{airport.name} 节点连通率与吞吐表现优良。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unlock Images Row (If any) -->
+        {airport.unlockImages && airport.unlockImages.length > 0 && (
+          <div class="mt-6 pt-6 border-t border-white/10">
+            <h4 class="text-xs font-mono text-zinc-400 mb-3 flex items-center gap-1.5">
+              <span>流媒体与 ChatGPT 原生解锁截图：</span>
+            </h4>
+            <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              {airport.unlockImages.map((img) => (
+                <div class="rounded-xl overflow-hidden border border-white/10">
+                  <img src={url(img)} alt="解锁检测" class="w-full h-28 object-cover" loading="lazy" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+    ))}
+  </div>
+
+  <!-- Related Deep Performance & Architecture Articles -->
+  <section class="my-16 p-8 liquid-glass rounded-3xl shadow-xl border border-white/10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 mb-2">
+          网络性能深度解析
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-white">
+          测速背后的底层网络架构与解锁技术
+        </h2>
+      </div>
+      <a
+        href={url('/blog')}
+        class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-semibold"
+      >
+        <span>查阅全部技术报告 →</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <a
+        href={url('/blog/01-mastering-iepl-iplc-architecture')}
+        class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-cyan-400">网络拓扑原理</span>
+        <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-2">
+          深入解析 IEPL 与 IPLC 专线：跨境网络传输原理与防封抗抖动全指南
+        </h3>
+        <p class="text-xs text-zinc-300 leading-relaxed">
+          为什么真实专线在晚高峰能够保持 0 丢包？拆解运营商二层内网传输拓扑与 MTR 路由跳数探测真假专线。
+        </p>
+      </a>
+
+      <a
+        href={url('/blog/03-streaming-ai-unlocking-handbook')}
+        class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-purple-400">原生解锁揭秘</span>
+        <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-2">
+          ChatGPT、Claude 与 Netflix 4K 原生解锁全揭秘：住宅 IP 与 DNS 分流技术实战
+        </h3>
+        <p class="text-xs text-zinc-300 leading-relaxed">
+          解析测速图中的 Netflix 全绿与 ChatGPT 解锁本质，掌握住宅 ISP 属性识别与防软降级分流方案。
+        </p>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

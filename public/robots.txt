@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Allow: /_astro/
+Disallow: /api/
+
+# Explicit search engine spider declarations
+User-agent: Googlebot
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: yisouspider
+Allow: /
+
+User-agent: Sogou web spider
+Allow: /
+
+User-agent: 360Spider
+Allow: /
+
+# Canonical Sitemaps
+Sitemap: https://paojichang.blog/sitemap-index.xml
+Sitemap: https://paojichang.blog/sitemap.xml
+Sitemap: https://paojichang.blog/rss.xml

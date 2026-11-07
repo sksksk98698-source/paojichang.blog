@@ -1,0 +1,216 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { platformsData } from '../../data/clients';
+import { url } from '../../utils/paths';
+import {
+  Download,
+  ExternalLink,
+  Laptop,
+  Smartphone,
+  Apple,
+  Cpu,
+  Router,
+  CheckCircle2,
+  BookOpen,
+  Sparkles,
+} from 'lucide-astro';
+
+const platformIcons: Record<string, any> = {
+  Windows: Laptop,
+  Android: Smartphone,
+  iOS: Apple,
+  macOS: Apple,
+  OpenWrt: Router,
+  Linux: Cpu,
+};
+---
+
+<BaseLayout
+  title="2026科学上网客户端大全 | Clash Verge Rev、v2rayN、小火箭下载与配置教程 — 跑机场"
+  description="全平台机场代理客户端下载大全与保姆级配置教程。收录 Windows (Clash Verge Rev/v2rayN)、安卓 (v2rayNG/FlClash)、苹果 iOS (Shadowrocket小火箭/Stash)、Mac 及 OpenWrt 软路由下载指南。"
+>
+  <!-- Header -->
+  <div class="mb-10 p-7 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.2),rgba(6,182,212,0.1)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-3">
+        <Sparkles class="w-3.5 h-3.5 text-cyan-400" />
+        全平台科学上网装机工具库
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-50 tracking-tight leading-tight mb-4">
+        2026 机场代理客户端大全与配置指南
+      </h1>
+
+      <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6">
+        在跑机场购买订阅后，需要配合适合您设备的客户端软件进行节点分流。我们按操作系统整理了主流开源客户端的项目下载通道与极简导入教程，带您 3 分钟极速上手。
+      </p>
+
+      <div class="flex flex-wrap items-center gap-2 pt-2">
+        {platformsData.map((p) => (
+          <a
+            href={`#${p.platform.toLowerCase()}`}
+            class="px-3.5 py-1.5 rounded-full liquid-pill hover:border-indigo-400/50 text-xs font-mono font-semibold text-zinc-300 hover:text-white transition-all flex items-center gap-1.5"
+          >
+            <span>{p.platform}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Sections -->
+  <div class="space-y-16">
+    {platformsData.map((group) => {
+      const IconComponent = platformIcons[group.platform] || Laptop;
+      return (
+        <section id={group.platform.toLowerCase()} class="scroll-mt-24">
+          <!-- Platform Title Bar -->
+          <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-8">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 to-indigo-600 text-white flex items-center justify-center shadow-md">
+              <IconComponent class="w-5 h-5" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-2xl font-black text-white">{group.platform} 平台客户端</h2>
+                <span class="text-xs font-mono px-2.5 py-0.5 rounded-full liquid-pill text-indigo-300">
+                  {group.badge}
+                </span>
+              </div>
+              <p class="text-xs sm:text-sm text-zinc-400 mt-1">{group.description}</p>
+            </div>
+          </div>
+
+          <!-- Clients Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {group.clients.map((client) => (
+              <div
+                class:list={[
+                  'p-6 sm:p-7 rounded-3xl flex flex-col justify-between shadow-lg transition-all',
+                  client.isPopular
+                    ? 'liquid-glass ring-1 ring-indigo-500/40'
+                    : 'liquid-glass-card',
+                ]}
+              >
+                <div>
+                  <div class="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <h3 class="text-xl font-bold text-white">{client.name}</h3>
+                        {client.isPopular && (
+                          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
+                            强烈推荐
+                          </span>
+                        )}
+                      </div>
+                      <p class="text-xs text-zinc-400 mt-1">{client.tagline}</p>
+                    </div>
+
+                    <span class="px-2.5 py-1 rounded-full font-mono text-[11px] liquid-pill text-emerald-400 shrink-0">
+                      {client.license}
+                    </span>
+                  </div>
+
+                  <!-- Features -->
+                  <div class="my-4 space-y-1.5 text-xs text-zinc-300">
+                    {client.coreFeatures.map((feat) => (
+                      <div class="flex items-center gap-2">
+                        <CheckCircle2 class="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <!-- Supported Protocols -->
+                  <div class="mb-4 pt-3 border-t border-white/5 flex flex-wrap gap-1">
+                    {client.protocols.map((proto) => (
+                      <span class="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-mono text-zinc-400">
+                        {proto}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <!-- Tutorial & Download Actions -->
+                <div class="pt-4 border-t border-white/10 space-y-3">
+                  <!-- Quick steps -->
+                  <div class="p-3.5 rounded-xl bg-black/30 border border-white/5 text-xs text-zinc-300 font-mono space-y-1">
+                    <div class="font-bold text-indigo-300 mb-1 flex items-center gap-1">
+                      <BookOpen class="w-3.5 h-3.5" />
+                      <span>极简使用流程：</span>
+                    </div>
+                    {client.tutorialSummary.map((step, sIdx) => (
+                      <p class="text-[11px] text-zinc-400 leading-relaxed">
+                        {sIdx + 1}. {step}
+                      </p>
+                    ))}
+                  </div>
+
+                  <a
+                    href={client.downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:via-indigo-500 hover:to-purple-500 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:scale-[1.01] transition-all text-center cursor-pointer"
+                  >
+                    <Download class="w-3.5 h-3.5" />
+                    <span>前往项目官方发布页下载</span>
+                    <ExternalLink class="w-3 h-3 text-white/70" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    })}
+  </div>
+
+  <!-- Related In-depth Client Tuning Guides -->
+  <section class="my-16 p-8 liquid-glass rounded-3xl shadow-xl border border-white/10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4 mb-6">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-2">
+          客户端进阶指南
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-white">
+          客户端深度配置与分流排障手册
+        </h2>
+      </div>
+      <a
+        href={url('/blog')}
+        class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-semibold"
+      >
+        <span>浏览更多技术博客 →</span>
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <a
+        href={url('/blog/04-clash-verge-shadowrocket-rules')}
+        class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-cyan-400">TUN 模式 & 分流</span>
+        <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-2">
+          分流规则与 TUN 模式深度实践：Clash Verge Rev 与小火箭保姆级进阶调优
+        </h3>
+        <p class="text-xs text-zinc-300 leading-relaxed">
+          系统代理与 TUN 模式底层区别，Fake-IP 原理解析，以及解决微信变慢、Git 超时与游戏无法联网的实操排障方案。
+        </p>
+      </a>
+
+      <a
+        href={url('/blog/03-streaming-ai-unlocking-handbook')}
+        class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all hover:scale-[1.01] group"
+      >
+        <span class="text-xs font-mono text-purple-400">AI 与流媒体配置</span>
+        <h3 class="text-base font-bold text-white group-hover:text-indigo-300 transition-colors mt-1 mb-2">
+          ChatGPT、Claude 与 Netflix 4K 原生解锁全揭秘：住宅 IP 与 DNS 分流技术实战
+        </h3>
+        <p class="text-xs text-zinc-300 leading-relaxed">
+          如何配置分流规则集让 ChatGPT 访问走美国原生住宅 IP，同时避免本地 DNS 污染与账号风控。
+        </p>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

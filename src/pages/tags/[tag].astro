@@ -26,38 +26,48 @@ const { tag, posts } = Astro.props;
 ---
 
 <BaseLayout
-  title={`#${tag} Articles — ${siteConfig.name}`}
-  description={`Browse articles and notes tagged with #${tag}`}
+  title={`#${tag} 标签相关文章 — ${siteConfig.name}`}
+  description={`探索包含 #${tag} 标签的技术博客、实战指南与深度解析。跑机场网络实验室权威梳理相关协议、避坑指南与实操手册。`}
+  noindex={posts.length < 3}
 >
   <div class="mb-6">
     <a
       href={url('/tags')}
-      class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+      class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-indigo-400 transition-colors"
     >
       <ArrowLeft class="w-3.5 h-3.5" />
-      <span>All Tags</span>
+      <span>返回所有标签</span>
     </a>
   </div>
 
   <div class="mb-10 p-7 sm:p-10 liquid-glass rounded-3xl shadow-xl">
     <div class="flex items-center justify-between">
       <div>
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 mb-2.5">
-          Topic Filter
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-400/20 mb-2.5">
+          标签聚合与实战指南
         </div>
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-zinc-50 tracking-tight">
           #{tag}
         </h1>
-        <p class="text-sm text-zinc-600 dark:text-zinc-400 mt-2">
-          Found <strong class="text-zinc-900 dark:text-zinc-100 font-mono font-semibold">{posts.length}</strong> {posts.length === 1 ? 'article' : 'articles'} tagged with #{tag}
+        <p class="text-sm text-zinc-300 mt-2 max-w-2xl leading-relaxed">
+          收录跑机场网络实验室围绕 <strong>#{tag}</strong> 展开的深度实测报告与操作指南。包含网络底层传输架构分析、流媒体与 ChatGPT 原生解锁技巧及防跑路避坑经验。
         </p>
       </div>
 
       <div class="hidden sm:block">
-        <span class="font-mono text-3xl text-zinc-300 dark:text-zinc-700 font-bold">
+        <span class="font-mono text-3xl text-zinc-700 font-bold">
           #{tag.toUpperCase()}
         </span>
       </div>
+    </div>
+
+    <div class="mt-6 pt-6 border-t border-white/10 flex flex-wrap items-center gap-3 text-xs">
+      <span class="text-zinc-400">快速导航：</span>
+      <a href={url('/airports')} class="text-indigo-300 hover:text-white underline">42家机场品牌库</a>
+      <span class="text-zinc-600">·</span>
+      <a href={url('/speedtest')} class="text-cyan-300 hover:text-white underline">测速实测大厅</a>
+      <span class="text-zinc-600">·</span>
+      <a href={url('/faq')} class="text-emerald-300 hover:text-white underline">机场百科全书</a>
     </div>
   </div>
 

@@ -1,32 +1,19 @@
 /**
  * ==============================================================================
- * 🌟 DEV.LOG — SINGLE SOURCE OF TRUTH CONFIGURATION
+ * 🌟 跑机场 PAOJICHANG.BLOG — SINGLE SOURCE OF TRUTH CONFIGURATION
  * ==============================================================================
- * Welcome to your personal dev blog template!
- *
- * Customize the ENTIRE site by simply editing this single file:
- *  1. Site Brand, Title & Favicon (Name, SEO Title, Description, Favicon, OG Image)
- *  2. Author Profile (Your Name, Role, Bio, Avatar, Socials)
- *  3. Hero Section (Greeting, Tagline, Buttons)
- *  4. Navigation Menu & Categories
- *  5. Footer Details
+ * 高端 SEO / GEO 机场推荐与测速转化平台全局配置文件。
+ * 保留原主题 Liquid Glass 流体毛玻璃拟态视觉架构与原主题头像 UI。
  * ==============================================================================
  */
 
 export interface SiteAuthor {
-  /** Your full name (e.g., "Alex Morgan") */
   name: string;
-  /** Your job title or tagline (e.g., "Software Engineer & Creative Developer") */
   role: string;
-  /** Path to your avatar photo in public/ (e.g., "/images/avatar.jpg") */
   avatar: string;
-  /** Short personal bio displayed on the home page, about page, and article footers */
   bio: string;
-  /** Your current city / location (e.g., "San Francisco, CA") */
   location?: string;
-  /** Short status pill shown on your profile card */
   status?: string;
-  /** Your social and contact links */
   social: {
     github?: string;
     twitter?: string;
@@ -46,25 +33,17 @@ export interface CategoryInfo {
 }
 
 export interface SiteConfig {
-  /** Short brand name shown in the top header (e.g., "DEV.LOG" or "ALEX.DEV") */
   name: string;
-  /** Custom 1-letter badge in header (e.g., "D", "A", or "⚡") */
   logoLetter?: string;
-  /** Full default SEO page title shown in browser tabs */
   title: string;
-  /** Default meta description for search engines and social cards */
   description: string;
-  /** Production domain URL of your blog (e.g., "https://myblog.com") */
   url: string;
-  /** Path to favicon in public/ (e.g., "/favicon.svg", "/favicon.ico", or "/favicon.png") */
+  language: string;
   favicon: string;
-  /** Default OpenGraph preview image */
   defaultOgImage?: string;
 
-  /** Single Author Profile */
   author: SiteAuthor;
 
-  /** Home Page Hero Section */
   hero: {
     greeting: string;
     badge: string;
@@ -73,13 +52,16 @@ export interface SiteConfig {
     secondaryButton: { text: string; href: string };
   };
 
-  /** Header Navigation Links */
   navLinks: NavLink[];
-
-  /** Topic Categories */
   categories: CategoryInfo[];
 
-  /** About Me Page Details */
+  verification?: {
+    google?: string;
+    bing?: string;
+    shenma?: string;
+    baidu?: string;
+  };
+
   about?: {
     philosophyTitle?: string;
     philosophyParagraphs?: string[];
@@ -96,7 +78,6 @@ export interface SiteConfig {
     }>;
   };
 
-  /** Footer Newsletter & Subscription Details */
   newsletter?: {
     badge?: string;
     title?: string;
@@ -106,7 +87,6 @@ export interface SiteConfig {
     successMessage?: string;
   };
 
-  /** 404 Page Not Found Configuration */
   notFound?: {
     badge?: string;
     title?: string;
@@ -115,13 +95,11 @@ export interface SiteConfig {
     browseButtonText?: string;
   };
 
-  /** Search Modal Configuration */
   search?: {
     modalTitle?: string;
     placeholder?: string;
   };
 
-  /** UI Section Headings & Badges */
   ui?: {
     latestPostsBadge?: string;
     latestPostsTitle?: string;
@@ -135,7 +113,6 @@ export interface SiteConfig {
     writtenByText?: string;
   };
 
-  /** Footer Details */
   footer: {
     tagline: string;
     copyright: string;
@@ -145,32 +122,32 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   // ----------------------------------------------------------------------------
-  // 1. SITE BRANDING, TITLE & FAVICON
+  // 1. BRAND & SEO
   // ----------------------------------------------------------------------------
-  name: "DEV.LOG",
-  logoLetter: "D",
-  title: "DEV.LOG — Personal Dev Blog & Digital Garden",
+  name: "跑机场",
+  logoLetter: "跑",
+  title: "跑机场 | 2026优质机场推荐、IEPL专线节点测速与流媒体解锁实测 (paojichang.blog)",
   description:
-    "A high-performance personal developer blog and digital notebook crafted with Astro, strict TypeScript, and Liquid Glass UI.",
-  url: "https://devlog.example.com",
-  favicon: "/favicon.svg", // Place your favicon in public/favicon.svg or public/favicon.ico
-  defaultOgImage: "/images/og-default.png",
+    "跑机场 (paojichang.blog) 是专注于 42 家主流机场深度实测、IEPL/IPLC 专线对比、晚高峰带宽测速与 ChatGPT/Netflix 解锁测试的独立评测大厅。提供全站独家优惠码与全平台科学上网客户端指南。",
+  url: "https://paojichang.blog",
+  language: "zh-CN",
+  favicon: "/favicon.svg",
+  defaultOgImage: "/images/og-default.svg",
 
   // ----------------------------------------------------------------------------
-  // 2. AUTHOR PROFILE (SINGLE AUTHOR FOR ENTIRE SITE)
+  // 2. AUTHOR (保留原主题头像 UI 视觉)
   // ----------------------------------------------------------------------------
   author: {
-    name: "Alex Morgan",
-    role: "Software Engineer & Creative Developer",
-    avatar: "/images/avatar.jpg", // Place your photo in public/images/avatar.jpg
-    bio: "Frontend engineer and creative developer fascinated by the craft of building blazingly fast web apps, liquid glass design systems, and resilient software architectures.",
-    location: "San Francisco, CA",
-    status: "Building the future of spatial web interfaces",
+    name: "跑机场评测实验室",
+    role: "网络可观测性与专线实测团队",
+    avatar: "/images/avatar.jpg", // 保留原主题头像图片与视觉！
+    bio: "深耕全球跨境网络链路架构、BGP 智能中转、IEPL 内网专线与流媒体 AI 解锁实测。以真实数据说话，拒绝虚标跑路机场。",
+    location: "香港 / 东京 / 新加坡",
+    status: "全天候监测 42 家机场晚高峰网络丢包率与时延",
     social: {
-      github: "https://github.com/nivinvysakh/devlog-astro-template",
-      twitter: "https://twitter.com",
-      linkedin: "https://linkedin.com",
-      email: "alex@example.com",
+      github: "",
+      twitter: "",
+      email: "contact@paojichang.blog",
     },
   },
 
@@ -178,139 +155,150 @@ export const siteConfig: SiteConfig = {
   // 3. HOME HERO SECTION
   // ----------------------------------------------------------------------------
   hero: {
-    greeting: "Hey, I'm Alex",
-    badge: "Software Engineer • Creative Developer",
+    greeting: "选好梯子，拒绝踩坑",
+    badge: "2026 专线实测 • 42家品牌库 • 真实测速图",
     tagline:
-      "Welcome to my personal dev blog and digital notebook. I write about building fast web apps with Astro, mastering strict TypeScript, and crafting tactile Liquid Glass UI.",
+      "欢迎访问 跑机场 (paojichang.blog)。我们对业内 42 家主流机场进行长期晚高峰实测监控，覆盖 IEPL 专线、性价比平价、ChatGPT/流媒体 4K 解锁与不限时按量套餐，帮您在 1 分钟内锁定最适合自己的稳定高速网络。",
     primaryButton: {
-      text: "Read My Articles",
-      href: "/blog",
+      text: "查看 42 家机场品牌库",
+      href: "/airports",
     },
     secondaryButton: {
-      text: "About Me",
-      href: "/about",
+      text: "实测测速报告大厅",
+      href: "/speedtest",
     },
   },
 
   // ----------------------------------------------------------------------------
-  // 4. HEADER NAVIGATION LINKS
+  // 4. NAVIGATION BAR (按用户确认的方案升级)
   // ----------------------------------------------------------------------------
   navLinks: [
-    { text: "Articles", href: "/blog" },
-    { text: "Categories", href: "/categories" },
-    { text: "Tags", href: "/tags" },
-    { text: "About Me", href: "/about" },
+    { text: "精选推荐", href: "/#top10" },
+    { text: "42家品牌库", href: "/airports" },
+    { text: "测速实测榜", href: "/speedtest" },
+    { text: "免费资源", href: "/free" },
+    { text: "百科FAQ", href: "/faq" },
+    { text: "跑路预警", href: "/alert" },
+    { text: "客户端教程", href: "/clients" },
   ],
 
   // ----------------------------------------------------------------------------
-  // 5. TOPIC CATEGORIES
+  // 5. CATEGORIES
   // ----------------------------------------------------------------------------
   categories: [
-    { name: "Tech", desc: "Astro Islands architecture, core web performance, and TypeScript engineering." },
-    { name: "Design", desc: "Liquid Glass UI, spatial design systems, fluid motion, and modern aesthetics." },
-    { name: "Architecture", desc: "Domain-Driven Design, clean decoupled systems, and software durability." },
-    { name: "Story", desc: "Engineering insights, case studies, and modern frontend storytelling." },
+    { name: "Tech", desc: "IEPL/IPLC 专线底层原理解析、抗封锁协议与网络性能工程。" },
+    { name: "Design", desc: "Liquid Glass 流体毛玻璃拟态系统与现代网络仪表盘美学。" },
+    { name: "Architecture", desc: "全球 CDN 边缘调度、BGP 中转容灾与分布式节点监控拓扑。" },
+    { name: "Story", desc: "机场行业黑话科普、防跑路避坑指南与实测踩坑纪实。" },
   ],
 
   // ----------------------------------------------------------------------------
-  // 6. ABOUT ME PAGE (PHILOSOPHY, FOCUS PILLARS, TECH ARSENAL)
+  // 6. SEARCH ENGINE VERIFICATION (预留站长平台安全验证接口)
+  // ----------------------------------------------------------------------------
+  verification: {
+    google: "", // 填入 Google Search Console verification 字符串
+    bing: "",   // 填入 Bing Webmaster Tools msvalidate.01 字符串
+    shenma: "", // 填入 神马站长平台 shenma-site-verification 字符串
+    baidu: "",  // 填入 百度搜索资源平台 baidu-site-verification 字符串
+  },
+
+  // ----------------------------------------------------------------------------
+  // 7. ABOUT
   // ----------------------------------------------------------------------------
   about: {
-    philosophyTitle: "My Engineering Philosophy",
+    philosophyTitle: "跑机场的评测原则与独立声明",
     philosophyParagraphs: [
-      "I started this blog as my personal digital garden—a place to document experiments, architectural patterns, and lessons learned while crafting modern web applications.",
-      "I believe that a modern website should feel instantaneous, tactile, and visually delightful. In an era where web apps often ship megabytes of unnecessary JavaScript runtimes, I advocate for content-first static delivery with selective island hydration.",
+      "面对琳琅满目的网络代理服务商，虚假宣传、延迟造假、超售拥堵乃至突然跑路一直是广大科学上网用户的最大痛点。跑机场 (paojichang.blog) 创立的初衷，就是用真实的测速数据与透明的优缺点分析，击碎信息不对称。",
+      "我们承诺所有测评基于真实网络环境下的单机测速图、流媒体解锁报告与品牌原文资料。绝不为劣质商家粉饰太平，所有推广链接均明确标注合规声明，为每一位用户的每一分钱保驾护航。",
     ],
-    quote: "Every byte of JavaScript saved and every millisecond shaved off TTFB makes the web a faster, more accessible, and more joyful space for everyone.",
+    quote: "不迷信任何口头承诺，让晚高峰实测数据与真实解锁检测成为检验机场的唯一标准。",
     highlights: [
       {
         icon: "⚡",
-        title: "Speed & Zero-JS",
-        desc: "Shipping ultra-lightweight static HTML first, hydrating only when client interactivity is strictly required.",
+        title: "真实测速图支撑",
+        desc: "配备 MAI-TEST 与 Speedtest 晚高峰实测大图，延迟、带宽、丢包一目了然。",
       },
       {
-        icon: "✨",
-        title: "Liquid Glass Design",
-        desc: "Crafting translucent, refractive spatial UI with specular highlights and GPU-accelerated blur effects.",
+        icon: "🎬",
+        title: "流媒体与 AI 解锁矩阵",
+        desc: "实测 Netflix 原创剧、Disney+、ChatGPT、Claude 真实可用状态。",
+      },
+      {
+        icon: "💰",
+        title: "全网独家优惠码",
+        desc: "整理各品牌官方隐藏优惠券（如光速云 AMM、暮光 muguang5555 等），一键复制即刻立减。",
       },
       {
         icon: "🛡️",
-        title: "Type Safety & Domain Invariants",
-        desc: "Eliminating entire categories of runtime bugs using compiler-enforced discriminated unions and pure functions.",
-      },
-      {
-        icon: "🚀",
-        title: "60fps Micro-Interactions",
-        desc: "Building responsive spring physics, compositor animations, and tactile interactive feedback.",
+        title: "透明中立与安全合规",
+        desc: "所有推广链接规范标注 nofollow sponsored，客观揭示潜在风险与服务短板。",
       },
     ],
     techArsenal: [
-      { name: "Astro 7", desc: "Islands architecture, server islands, and zero-JS defaults", category: "Framework" },
-      { name: "TypeScript", desc: "Strict domain models, algebraic types, and nominal branding", category: "Language" },
-      { name: "Tailwind CSS 4", desc: "Liquid Glass design system, modern gradients & CSS tokens", category: "Styling" },
-      { name: "Vite & Pagefind", desc: "Instant hot-reloading and lightning-fast static indexing", category: "Tooling" },
-      { name: "React / Preact", desc: "Isolated reactive client components when state is required", category: "UI Library" },
-      { name: "Edge Runtimes", desc: "Distributed low-latency deployment at the CDN edge", category: "Infra" },
+      { name: "IEPL / IPLC 专线", desc: "不过公网 GFW 的内网跨境物理专线，抗封锁天花板", category: "网络线路" },
+      { name: "VLESS / Shadowsocks", desc: "低延迟、轻量级与强抗封锁现代化代理协议", category: "传输协议" },
+      { name: "Mihomo / Clash Verge", desc: "现代化桌面端分流核心与主流装机代理客户端", category: "通用工具" },
+      { name: "Shadowrocket 小火箭", desc: "iOS 端装机必备的轻量化规则代理分流神器", category: "移动工具" },
+      { name: "OpenClash 软路由", desc: "局域网全屋智能设备无感科学上网与电视直通", category: "网关拓扑" },
+      { name: "Pagefind 即时检索", desc: "客户端纯离线毫秒级快速匹配 42 家机场品牌", category: "站内检索" },
     ],
   },
 
   // ----------------------------------------------------------------------------
-  // 7. FOOTER NEWSLETTER & SUBSCRIPTION
+  // 7. FOOTER NEWSLETTER
   // ----------------------------------------------------------------------------
   newsletter: {
-    badge: "Personal Dev Notes",
-    title: "Follow My Engineering Journey & Experiments",
-    description:
-      "Occasional writeups on frontend architecture, liquid glass UI craft, Astro experiments, and lessons learned building software.",
-    placeholder: "you@domain.com",
-    buttonText: "Get Updates",
-    successMessage: "Thanks for subscribing to my dev notes!",
+    badge: "跑机场内参早报",
+    title: "第一时间获取机场优惠活动与最新测速报告",
+    description: "不定期推送优质机场打折码、新增线路通报与节点状态突发预警，无任何垃圾营销邮件。",
+    placeholder: "请输入您的常用邮箱...",
+    buttonText: "免费订阅情报",
+    successMessage: "感谢订阅！最新机场评测与专线特惠将第一时间投递至您的邮箱。",
   },
 
   // ----------------------------------------------------------------------------
-  // 8. 404 NOT FOUND PAGE
+  // 8. 404 NOT FOUND
   // ----------------------------------------------------------------------------
   notFound: {
-    badge: "HTTP_STATUS // 404_NOT_FOUND",
-    title: "Page Lost in the Stream",
-    description:
-      "The route, article, or resource you were looking for doesn't exist, has been moved, or is currently being rewritten.",
-    homeButtonText: "Return Home",
-    browseButtonText: "Browse Articles",
+    badge: "HTTP_STATUS // 404_AIRPORT_LOST",
+    title: "该机场或评测节点已迁出",
+    description: "您访问的机场品牌评测或测速页面可能已被合并、更新，或换用了新的路由。",
+    homeButtonText: "返回跑机场首页",
+    browseButtonText: "查看 42 家机场品牌库",
   },
 
   // ----------------------------------------------------------------------------
-  // 9. SEARCH MODAL CONFIGURATION
+  // 9. SEARCH
   // ----------------------------------------------------------------------------
   search: {
-    modalTitle: "Search Publications",
-    placeholder: "Type keywords (e.g. Astro, TypeScript, Islands, CSS)...",
+    modalTitle: "检索 42 家机场与技术评测",
+    placeholder: "输入机场名称、协议、专线或优惠码（如 光速云、IEPL、AMM、VLESS）...",
   },
 
   // ----------------------------------------------------------------------------
-  // 10. REUSABLE UI LABELS & SECTION TITLES
+  // 10. REUSABLE UI
   // ----------------------------------------------------------------------------
   ui: {
-    latestPostsBadge: "Recent Writing",
-    latestPostsTitle: "Latest Notes & Deep Dives",
-    categoriesTitle: "Browse by Topic",
-    tagsTitle: "Popular Tags",
-    shareTitle: "Share This Post",
-    shareDescription: "Found this post helpful? Share it with your developer friends.",
-    shareCopiedMessage: "Post link copied to clipboard!",
-    tocTitle: "Table of Contents",
-    authorCardTitle: "About the Author",
-    writtenByText: "Written by",
+    latestPostsBadge: "前沿评测与内参",
+    latestPostsTitle: "最新机场专题与深度选购指南",
+    categoriesTitle: "探索核心技术专栏",
+    tagsTitle: "热门关键词与技术标签",
+    shareTitle: "分享与推荐",
+    shareDescription: "若本篇机场测评对您的选购有所帮助，欢迎分享给身边的朋友。",
+    shareCopiedMessage: "评测链接已复制到剪贴板！",
+    tocTitle: "测评目录索引",
+    authorCardTitle: "评测出品方",
+    writtenByText: "评测维护",
   },
 
   // ----------------------------------------------------------------------------
-  // 11. FOOTER DETAILS
+  // 11. FOOTER
   // ----------------------------------------------------------------------------
   footer: {
-    tagline: "Crafted with Astro 7, TypeScript, and Liquid Glass aesthetics.",
-    copyright: "Alex Morgan",
+    tagline: "2026 优质机场实测推荐与全平台科学上网指南。",
+    copyright: "跑机场 PAOJICHANG.BLOG",
     brandDescription:
-      "Personal blog & digital notebook template. Writing about high-performance web development, TypeScript architecture, and creative UI engineering.",
+      "跑机场 (paojichang.blog) 专注于全球 42 家主流机场客观测评、IEPL 专线测速、流媒体与 AI 解锁测试及客户端配置教程。含推广链接，注册可能产生佣金但不影响实际购买价格。",
   },
 };
 

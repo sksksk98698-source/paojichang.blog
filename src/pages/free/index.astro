@@ -1,0 +1,395 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { url } from '../../utils/paths';
+import siteConfig from '../../config/site';
+import {
+  Gift,
+  ShieldCheck,
+  AlertTriangle,
+  ArrowRight,
+  ExternalLink,
+  Terminal,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  Clock,
+  Sparkles,
+} from 'lucide-astro';
+
+// FAQ Schema.org JSON-LD
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: '公共免费节点真的安全吗？有哪些潜在风险？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '公共免费节点存在极高的网络安全风险。运营公共节点的第三方服务器可以轻易实施中间人攻击（MITM），窃听并记录未加密的通信数据，注入恶意广告，甚至作为黑产网络犯罪的蜜罐跳板。涉及个人网银、密码账号和工作邮件等核心数据，切勿使用公共免费节点。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Cloudflare WARP 免费节点为什么有时无法连接或速度慢？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Cloudflare WARP 基于 WireGuard 协议直连官方 Anycast IP，由于该协议握手特征明显，中国大陆部分省份的运营商骨干网对其 UDP 端口实施了深度 QoS 限速与阻断。配合 WARP 优选 IP 工具筛选本地低延迟接入端点，可显著改善连接可用性。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '既然有免费节点，为什么还需要购买按量或月付机场？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '免费节点无法保障网络确定性，在晚高峰黄金时段丢包率常高达 30% 以上，且无法解锁 Netflix 4K 原生片库或稳定通过 OpenAI/Claude 的风控检测。月付约 8 元的 IEPL 专线或按量付费备用套餐，能以极低成本换取全天候 0 丢包和原生 IP 支持，节约大量排障时间。',
+      },
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="2026科学上网免费资源大全 | Cloudflare WARP脚本、公共节点评测与白嫖避坑指南 — 跑机场"
+  description="跑机场评测实验室权威汇总：2026 全网科学上网免费资源与白嫖生存指南。包含 Cloudflare WARP 官方配置、GitHub 开源高星节点池可用性监控、42家机场免费试用清单及公共免费节点安全风险深度揭秘。"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+  <!-- Hero Banner -->
+  <div class="mb-10 p-7 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(168,85,247,0.22),rgba(6,182,212,0.12)_35%,transparent_65%)] pointer-events-none rounded-3xl"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-300 border border-purple-400/20 mb-3">
+        <Gift class="w-3.5 h-3.5 text-pink-400" />
+        全网免费资源与白嫖生存实验室
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-50 tracking-tight leading-tight mb-4">
+        2026 全网科学上网免费资源大全与安全生存指南
+      </h1>
+
+      <p class="text-sm sm:text-base text-zinc-300 leading-relaxed mb-6">
+        天下没有免费的午餐，但有客观的白嫖方法论。本专区真实梳理合规官方免费工具（Cloudflare WARP）、精选开源公共节点池、42 家服务商真实试用机制，并深度曝光公共免费节点背后的中间人监听与隐私黑产陷阱。
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3 pt-2">
+        <a
+          href="#warp"
+          class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-all flex items-center gap-1.5"
+        >
+          <span>Cloudflare WARP 官方专区</span>
+          <ArrowRight class="w-3.5 h-3.5" />
+        </a>
+        <a
+          href="#trials"
+          class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition-all flex items-center gap-1.5"
+        >
+          <span>42家品牌真实免费试用表</span>
+          <ArrowRight class="w-3.5 h-3.5" />
+        </a>
+        <a
+          href="#security"
+          class="px-4 py-2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-all flex items-center gap-1.5"
+        >
+          <AlertTriangle class="w-3.5 h-3.5" />
+          <span>公共节点安全风险预警</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Security Alert (High Priority) -->
+  <section id="security" class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl border border-rose-500/30 relative overflow-hidden">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
+        <AlertTriangle class="w-5 h-5" />
+      </div>
+      <div>
+        <h2 class="text-lg sm:text-xl font-bold text-white">
+          安全红线警告：警惕“全免费公共节点”背后的数据窃密陷阱
+        </h2>
+        <span class="text-xs text-rose-300 font-mono">MITM 中间人攻击 / 蜜罐窃听 / 账号盗用风险</span>
+      </div>
+    </div>
+
+    <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
+      服务器带宽和跨国骨干网线路每个月都需要真金白银的支出。网上流传的大量免翻墙分享网站、Telegram 盗版节点订阅，背后往往由黑产黑客或广告流量贩子操盘：
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+      <div class="p-4 rounded-2xl bg-black/30 border border-rose-500/20">
+        <strong class="text-rose-400 block mb-1">1. 中间人劫持（MITM）</strong>
+        <p class="text-zinc-400 leading-relaxed">
+          不法节点提供者可以在代理落地端解包明文流量，拦截未采用高强度 HSTS 加密的表单、窃取网页访问记录与设备指纹。
+        </p>
+      </div>
+      <div class="p-4 rounded-2xl bg-black/30 border border-rose-500/20">
+        <strong class="text-rose-400 block mb-1">2. 蜜罐钓鱼与黑产滥用</strong>
+        <p class="text-zinc-400 leading-relaxed">
+          部分节点被黑产用作网络扫描、撞库攻击的出口肉鸡，导致该 IP 上的所有正常用户一同被各类云盾、金融服务列入封禁黑名单。
+        </p>
+      </div>
+      <div class="p-4 rounded-2xl bg-black/30 border border-rose-500/20">
+        <strong class="text-rose-400 block mb-1">3. 恶意广告注入与劫持</strong>
+        <p class="text-zinc-400 leading-relaxed">
+          在返回的 HTTP 网页中强行插入博彩、弹窗诈骗广告，甚至诱导用户下载带后门的受污染客户端安装包。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Cloudflare WARP Official Free Solution -->
+  <section id="warp" class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl border border-white/10">
+    <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+          <Terminal class="w-5 h-5" />
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">
+            Cloudflare WARP / WARP+：唯一推荐的正规官方免费方案
+          </h2>
+          <span class="text-xs text-zinc-400 font-mono">全球 CDN 巨头官方 Anycast 骨干网络 · 无限流量</span>
+        </div>
+      </div>
+      <span class="hidden sm:inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+        100% 官方可信
+      </span>
+    </div>
+
+    <div class="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+      <p>
+        Cloudflare WARP 是由全球最大的 CDN 网络运营商 Cloudflare 推出的官方安全隧道应用。其底层采用现代化的 <strong>WireGuard 协议</strong>，将设备流量加密发送到最近的 Cloudflare Anycast 数据中心边缘节点。
+      </p>
+
+      <!-- Architecture Box -->
+      <div class="p-4 rounded-2xl bg-black/40 border border-white/10 font-mono text-xs text-zinc-300">
+        <div class="text-cyan-400 font-bold mb-2">// WARP 优选端点实操流程（解决国内连不上问题）</div>
+        <p class="text-zinc-400 mb-2">1. 下载官方 WARP 客户端（Windows / macOS / Android / iOS）；</p>
+        <p class="text-zinc-400 mb-2">2. 使用开源的 <code>CloudflareSpeedTest</code> 测速脚本筛选出本地宽带延迟低于 60ms 的可用 Endpoint IP；</p>
+        <p class="text-zinc-400">3. 在支持 WireGuard 的客户端（如 Clash Verge Rev、Sing-box）中配置优选 Endpoint 节点。</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+          <div class="font-bold text-white mb-1 flex items-center gap-1.5 text-xs">
+            <CheckCircle2 class="w-4 h-4 text-emerald-400" />
+            <span>WARP 核心优势</span>
+          </div>
+          <ul class="text-xs text-zinc-400 space-y-1 list-disc list-inside">
+            <li>大厂官方背书，绝无第三方中间人嗅探与窃密风险；</li>
+            <li>免费版即支持无上限流量，刷网页查资料极为稳定；</li>
+            <li>天然解锁 Google 学术、Wikipedia、GitHub 官网。</li>
+          </ul>
+        </div>
+
+        <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+          <div class="font-bold text-white mb-1 flex items-center gap-1.5 text-xs">
+            <XCircle class="w-4 h-4 text-amber-400" />
+            <span>WARP 物理局限</span>
+          </div>
+          <ul class="text-xs text-zinc-400 space-y-1 list-disc list-inside">
+            <li>IP 属于 Cloudflare 数据中心网段，<strong>无法解锁 ChatGPT 与 Netflix 完整片库</strong>；</li>
+            <li>WireGuard 协议特征明显，国内晚高峰跨网 UDP 丢包率较高；</li>
+            <li>需要手动筛选优选 IP 才能获得较为理想的连接速度。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Airport Trials Matrix -->
+  <section id="trials" class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl border border-white/10">
+    <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <Sparkles class="w-5 h-5" />
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">
+            42 家正规机场“真实免费试用与签到福利”矩阵
+          </h2>
+          <span class="text-xs text-zinc-400 font-mono">无需绑定信用卡 · 零成本体验高品质专线</span>
+        </div>
+      </div>
+      <a
+        href={url('/airports')}
+        class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+      >
+        <span>查看 42 家全部品牌</span>
+        <ArrowRight class="w-3.5 h-3.5" />
+      </a>
+    </div>
+
+    <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-6">
+      相比不知底细的公共免费节点，利用正规运营品牌的官方试用配额体验真实专线是更安全聪明的选择。以下为跑机场实测整理的白嫖福利机制：
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Card 1 -->
+      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 relative overflow-hidden group hover:border-indigo-400/40 transition-all">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-white text-base">光速云</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">第一主力推荐</span>
+        </div>
+        <p class="text-xs text-zinc-400 mb-4 leading-relaxed">
+          注册后可直接领取基础免费体验流量，香港/日本多节点支持。体验满意后年付轻量折合约 8 元/月。
+        </p>
+        <div class="text-xs font-mono text-zinc-300 mb-4">
+          优惠码：<strong class="text-indigo-300">AMM</strong> · 支持永久套餐
+        </div>
+        <a
+          href={url('/airports/guangshuyun')}
+          class="block w-full py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 text-center text-xs font-bold transition-all"
+        >
+          查看光速云评测与领取试用
+        </a>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 relative overflow-hidden group hover:border-indigo-400/40 transition-all">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-white text-base">二猫云</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">每日签到送流量</span>
+        </div>
+        <p class="text-xs text-zinc-400 mb-4 leading-relaxed">
+          提供用户面板每日打卡签到机制，每天免费随机获赠 1G ~ 5G 高速流量，极简白嫖首选。
+        </p>
+        <div class="text-xs font-mono text-zinc-300 mb-4">
+          起步资费：<strong class="text-emerald-400">¥12/月起</strong>
+        </div>
+        <a
+          href={url('/airports/ermao')}
+          class="block w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-200 text-center text-xs font-bold transition-all"
+        >
+          查看二猫云签到规则
+        </a>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 relative overflow-hidden group hover:border-indigo-400/40 transition-all">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-bold text-white text-base">闪跃网络</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono">1元极低门槛试用</span>
+        </div>
+        <p class="text-xs text-zinc-400 mb-4 leading-relaxed">
+          提供 1 元体验包，包含多条 BGP 中转线路与完整流媒体解锁权限，避免任何大额投资风险。
+        </p>
+        <div class="text-xs font-mono text-zinc-300 mb-4">
+          起步资费：<strong class="text-emerald-400">¥1.00 试用包</strong>
+        </div>
+        <a
+          href={url('/airports/shanyue')}
+          class="block w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-200 text-center text-xs font-bold transition-all"
+        >
+          查看闪跃网络试用详情
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Cost Comparison Matrix (Why Pay?) -->
+  <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl border border-white/10">
+    <div class="max-w-2xl mb-6">
+      <h2 class="text-xl font-bold text-white mb-2">
+        生产力账本：免费白嫖 vs 廉价付费（折合 ¥8/月）实测对比
+      </h2>
+      <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+        很多用户每天花费半小时去到处寻找失效的免费订阅，实际浪费的时间成本远超几元钱的专线开销：
+      </p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse text-xs font-mono">
+        <thead>
+          <tr class="border-b border-white/10 text-zinc-400 uppercase text-[11px]">
+            <th class="py-3 px-4">评估维度</th>
+            <th class="py-3 px-4 text-amber-400">公共免费节点 / 网上订阅</th>
+            <th class="py-3 px-4 text-emerald-400">优质 IEPL 专线 (如光速云折合 ¥8/月)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 text-zinc-300">
+          <tr class="hover:bg-white/5">
+            <td class="py-3 px-4 font-bold text-white">晚高峰可用率 (20:00-23:00)</td>
+            <td class="py-3 px-4 text-rose-400">低于 20% (频繁断流、大面积红色超时)</td>
+            <td class="py-3 px-4 text-emerald-400">99.9% (物理专线直连，0 丢包)</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="py-3 px-4 font-bold text-white">ChatGPT / Claude 解锁</td>
+            <td class="py-3 px-4 text-rose-400">极大概率报错 1020 或被永久封号</td>
+            <td class="py-3 px-4 text-emerald-400">原生纯净住宅 IP，稳定丝滑通过风控</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="py-3 px-4 font-bold text-white">Netflix / Disney+ 4K</td>
+            <td class="py-3 px-4 text-rose-400">被软降级仅能看自制剧，画质模糊</td>
+            <td class="py-3 px-4 text-emerald-400">全区解锁，4K HDR / 杜比音效秒开</td>
+          </tr>
+          <tr class="hover:bg-white/5">
+            <td class="py-3 px-4 font-bold text-white">日常维护时间成本</td>
+            <td class="py-3 px-4 text-rose-400">每天耗费 20-40 分钟找新节点</td>
+            <td class="py-3 px-4 text-emerald-400">导入一次全年无感知自适应分流</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 5: GEO Answer Blocks & FAQs -->
+  <section class="my-10 p-6 sm:p-8 liquid-glass rounded-3xl shadow-xl border border-white/10">
+    <div class="flex items-center gap-2 mb-6">
+      <HelpCircle class="w-5 h-5 text-indigo-400" />
+      <h2 class="text-xl font-bold text-white">
+        免费资源核心问答（GEO / AI Answer Block）
+      </h2>
+    </div>
+
+    <div class="space-y-6">
+      <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+        <h3 class="text-sm sm:text-base font-bold text-white mb-2">
+          公共免费节点为什么一到晚上就完全打不开网页？
+        </h3>
+        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+          公共免费节点本质上是公开部署的普通 VPS 云服务器。一到晚高峰（20:00 - 23:00），成千上万个用户同时挤入同一台服务器的共享出口，导致 CPU 占用率 100%、国际骨干网出口发生严重拥塞。此时中国电信、联通、移动的 QoS 流控机制会对高并发的公共代理流量强制丢包 30% 以上，导致连接大面积超时瘫痪。
+        </p>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-white/5 border border-white/5">
+        <h3 class="text-sm sm:text-base font-bold text-white mb-2">
+          如何利用 Cloudflare WARP 搭建个人稳定免费环境？
+        </h3>
+        <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+          最优雅的方法是使用开源优选脚本筛选本地运营商直连延迟在 50ms 内的 Cloudflare 节点 IP，将其提取为 WireGuard 配置，并导入 Clash Verge Rev 或小火箭中。通过配置分流规则，将 Wikipedia、GitHub 等学术开发流量导向 WARP，国内流量保持直连，从而实现兼顾安全、高速与零成本的开发环境。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cross-link Related Hubs -->
+  <div class="my-12 p-8 liquid-glass rounded-3xl border border-indigo-500/30 text-center relative overflow-hidden shadow-2xl">
+    <div class="relative z-10 max-w-xl mx-auto space-y-4">
+      <h3 class="text-2xl font-black text-white">
+        准备好告别卡顿与频繁失效了吗？
+      </h3>
+      <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+        探索跑机场经过长期实测收录的 42 家高信誉服务商，找到起步成本低至几元钱的真实稳定专线。
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <a
+          href={url('/airports')}
+          class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-xl hover:scale-105 transition-all"
+        >
+          <span>进入 42 家机场品牌大厅</span>
+          <ArrowRight class="w-4 h-4" />
+        </a>
+        <a
+          href={url('/speedtest')}
+          class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full liquid-pill hover:border-indigo-400/40 text-zinc-200 font-bold text-xs sm:text-sm hover:scale-105 transition-all"
+        >
+          <span>查看晚高峰实测大图</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

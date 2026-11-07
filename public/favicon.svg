@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="prism" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8"/>
+    <linearGradient id="pao-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06B6D4"/>
       <stop offset="50%" stop-color="#6366F1"/>
       <stop offset="100%" stop-color="#A855F7"/>
     </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
-  <rect width="100" height="100" rx="28" fill="url(#prism)"/>
-  <path d="M32 70 L50 28 L68 70 M38 54 L62 54" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect width="100" height="100" rx="28" fill="url(#pao-gradient)"/>
+  <!-- Modern Geometric 'P' -->
+  <path d="M36 74 V26 H56 C67 26 74 33 74 44 C74 55 67 62 56 62 H48 V74 Z M48 50 H55 C60 50 63 48 63 44 C63 40 60 38 55 38 H48 Z" fill="#FFFFFF" filter="url(#glow)"/>
 </svg>

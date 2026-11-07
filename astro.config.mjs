@@ -7,33 +7,22 @@ import { defineConfig } from 'astro/config';
 import process from 'node:process';
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs';
 
-// Detect build platform: Netlify vs GitHub Pages vs Local / Docker
-const isNetlify = Boolean(process.env.NETLIFY);
-const isGitHubActions = Boolean(process.env.GITHUB_ACTIONS);
-const isGitHubPages = isGitHubActions && !isNetlify;
+// Resolve canonical site URL with precedence:
+// 1. Explicit SITE_URL environment variable
+// 2. Netlify / Vercel deployment URL
+// 3. Official domain https://paojichang.blog
+const siteUrl = process.env.SITE_URL 
+  || (process.env.NETLIFY ? process.env.URL : '')
+  || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
+  || 'https://paojichang.blog';
 
-// Extract repository name and owner when building inside GitHub Actions
-const githubRepo = process.env.GITHUB_REPOSITORY || 'nivinvysakh/devlog-astro-template';
-const repoOwner = process.env.GITHUB_REPOSITORY_OWNER || githubRepo.split('/')[0] || 'nivinvysakh';
-const repoName = githubRepo.split('/')[1] || 'devlog-astro-template';
-
-// If repository is a root user/org page (e.g. "username.github.io"), base is "/", otherwise "/<repo-name>/"
-const isUserRootPage = repoName.endsWith('.github.io');
-const githubBase = isUserRootPage ? '/' : `/${repoName}/`;
-
-// Dynamic site URL and base path resolution
-const siteUrl = isNetlify
-  ? (process.env.URL || 'https://devblogsite.netlify.app')
-  : isGitHubPages
-  ? `https://${repoOwner}.github.io`
-  : 'https://devlog.example.com';
-
-const basePath = isGitHubPages ? githubBase : '/';
+const basePath = process.env.BASE_PATH || '/';
 
 // https://astro.build/config
 export default defineConfig({
   site: siteUrl,
   base: basePath,
+  trailingSlash: 'never',
   markdown: {
     remarkPlugins: [remarkReadingTime],
   },
@@ -50,7 +39,11 @@ export default defineConfig({
       },
     }),
     mdx(),
-    sitemap(),
+    sitemap({
+      changefreq: 'weekly',
+      priority: 0.7,
+      lastmod: new Date(),
+    }),
   ],
   vite: {
     // @ts-ignore

@@ -4,7 +4,7 @@ import TableOfContents from '../components/ui/TableOfContents.astro';
 import TagBadge from '../components/ui/TagBadge.astro';
 import siteConfig from '../config/site';
 import { url } from '../utils/paths';
-import { Calendar, Clock, User, Share2, ArrowLeft, ArrowRight, Sparkles, Github, Twitter, Linkedin, Mail } from 'lucide-astro';
+import { Calendar, Clock, Share2, ArrowLeft, ArrowRight, Github, Twitter, Linkedin, Mail } from 'lucide-astro';
 
 interface Props {
   post: any;
@@ -17,27 +17,98 @@ interface Props {
 const { post, headings = [], readingTime, prevPost, nextPost } = Astro.props;
 const data = post.data;
 
-// Single author from centralized site config
-const authorName = siteConfig.author.name;
+const authorName = data.author || siteConfig.author.name;
 const authorRole = siteConfig.author.role;
 const authorAvatar = siteConfig.author.avatar;
 const authorBio = siteConfig.author.bio;
 const authorSocial = siteConfig.author.social;
 const ui = siteConfig.ui || {
-  shareTitle: 'Share This Post',
-  shareDescription: 'Found this post helpful? Share it with your developer friends.',
-  shareCopiedMessage: 'Post link copied to clipboard!',
-  authorCardTitle: 'About the Author',
-  writtenByText: 'Written by',
+  shareTitle: '分享与探讨',
+  shareDescription: '若本篇分析对您有所启发，欢迎分享至技术社群。',
+  shareCopiedMessage: '文章链接已复制到剪贴板！',
+  authorCardTitle: '作者专栏',
+  writtenByText: '本文撰写',
+};
+
+const siteBaseUrl = Astro.site ? Astro.site.toString() : siteConfig.url;
+const postSlug = post.id.replace(/\.(md|mdx)$/, '');
+const postUrl = new URL(url(`/blog/${postSlug}`), siteBaseUrl).href;
+const heroImageUrl = data.heroImage 
+  ? (data.heroImage.startsWith('http') ? data.heroImage : new URL(url(data.heroImage), siteBaseUrl).href)
+  : new URL(url(siteConfig.defaultOgImage || '/images/og-default.svg'), siteBaseUrl).href;
+
+// Article Schema.org JSON-LD
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: data.title,
+  description: data.description,
+  image: [heroImageUrl],
+  datePublished: data.pubDate.toISOString(),
+  dateModified: (data.updatedDate || data.pubDate).toISOString(),
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': postUrl,
+  },
+  author: {
+    '@type': 'Person',
+    name: authorName,
+    jobTitle: authorRole,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: siteConfig.name,
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL(url(siteConfig.favicon), siteBaseUrl).href,
+    },
+  },
+  keywords: data.tags || [],
+  articleSection: data.category,
+};
+
+// Breadcrumb Schema.org JSON-LD
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: '首页',
+      item: siteBaseUrl,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: '文章列表',
+      item: new URL(url('/blog'), siteBaseUrl).href,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: data.title,
+      item: postUrl,
+    },
+  ],
 };
 ---
 
 <BaseLayout
-  title={data.title}
+  title={`${data.title} — ${siteConfig.name}`}
   description={data.description}
   image={data.heroImage}
   article={true}
+  publishedTime={data.pubDate.toISOString()}
+  modifiedTime={data.updatedDate ? data.updatedDate.toISOString() : undefined}
+  tags={data.tags}
+  canonical={postUrl}
 >
+  <fragment slot="head">
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </fragment>
+
   <!-- Reading Progress Bar -->
   <div
     id="reading-progress-bar"
@@ -46,25 +117,27 @@ const ui = siteConfig.ui || {
   ></div>
 
   <!-- Breadcrumb / Back Link -->
-  <nav class="mb-6 flex items-center justify-between">
+  <nav class="mb-6 flex items-center justify-between" aria-label="Breadcrumb">
     <a
       href={url('/blog')}
-      class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+      class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-indigo-400 transition-colors"
     >
       <ArrowLeft class="w-3.5 h-3.5" />
-      <span>All Articles</span>
+      <span>返回全部文章</span>
     </a>
 
     <div class="flex items-center gap-2">
-      <span class="bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs px-2.5 py-0.5 rounded-full border border-indigo-500/20 dark:border-indigo-400/25 font-semibold">
+      <a
+        href={url(`/categories/${data.category.toLowerCase()}`)}
+        class="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 text-xs px-2.5 py-0.5 rounded-full border border-indigo-400/25 font-semibold transition-colors"
+      >
         {data.category}
-      </span>
+      </a>
     </div>
   </nav>
 
   <!-- Article Header Banner -->
   <header class="p-6 sm:p-10 lg:p-12 liquid-glass rounded-3xl shadow-xl mb-8 relative overflow-hidden">
-    <!-- Optional Hero Image on Top of Blog Post -->
     {data.heroImage && (
       <div class="mb-8 -mx-2 sm:-mx-4 -mt-2 sm:-mt-4 rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 shadow-lg relative group">
         <img
@@ -73,25 +146,27 @@ const ui = siteConfig.ui || {
           class="w-full h-60 sm:h-80 md:h-[380px] object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.02]"
           loading="eager"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-slate-950/10 to-transparent pointer-events-none"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/20 to-transparent pointer-events-none"></div>
       </div>
     )}
 
     <!-- Top Tags & Meta -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
       <div class="flex items-center gap-2">
-        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/25">
           {data.category}
         </span>
       </div>
 
-      <div class="flex items-center gap-4 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+      <div class="flex items-center gap-4 text-xs font-medium text-zinc-400">
         <span class="flex items-center gap-1.5">
           <Calendar class="w-3.5 h-3.5 text-zinc-400" />
-          {new Date(data.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          <time datetime={data.pubDate.toISOString()}>
+            {new Date(data.pubDate).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })}
+          </time>
         </span>
         {readingTime && (
-          <span class="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-medium">
+          <span class="flex items-center gap-1.5 text-indigo-400 font-medium">
             <Clock class="w-3.5 h-3.5" />
             {readingTime}
           </span>
@@ -100,32 +175,32 @@ const ui = siteConfig.ui || {
     </div>
 
     <!-- Main Title -->
-    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight leading-tight mb-5">
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-50 tracking-tight leading-tight mb-5">
       {data.title}
     </h1>
 
     <!-- Description / Hook -->
-    <p class="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 font-normal leading-relaxed max-w-3xl mb-8">
+    <p class="text-base sm:text-lg text-zinc-300 font-normal leading-relaxed max-w-3xl mb-8">
       {data.description}
     </p>
 
     <!-- Meta bottom row -->
-    <div class="pt-6 border-t border-white/20 dark:border-white/10 flex flex-wrap items-center justify-between gap-4">
+    <div class="pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
       <!-- Author info with photo -->
       <div class="flex items-center gap-3">
         {authorAvatar && (authorAvatar.startsWith('/') || authorAvatar.startsWith('http')) ? (
           <img
             src={url(authorAvatar)}
             alt={authorName}
-            class="w-11 h-11 rounded-full object-cover border border-white/25 dark:border-white/10 shadow-md ring-2 ring-indigo-500/20"
+            class="w-11 h-11 rounded-full object-cover border border-white/20 shadow-md ring-2 ring-indigo-500/20"
           />
         ) : (
-          <div class="w-11 h-11 rounded-full liquid-pill flex items-center justify-center font-bold text-sm text-indigo-600 dark:text-indigo-300 shadow-sm">
+          <div class="w-11 h-11 rounded-full liquid-pill flex items-center justify-center font-bold text-sm text-indigo-300 shadow-sm">
             {authorAvatar || '⚡'}
           </div>
         )}
         <div>
-          <div class="font-bold text-sm text-zinc-900 dark:text-zinc-100">{authorName}</div>
+          <div class="font-bold text-sm text-zinc-100">{authorName}</div>
           <div class="text-[11px] text-zinc-400">{authorRole}</div>
         </div>
       </div>
@@ -144,26 +219,26 @@ const ui = siteConfig.ui || {
     <!-- Left: Article Body (8 cols) -->
     <article data-pagefind-body class="lg:col-span-8 liquid-glass p-6 sm:p-10 rounded-3xl shadow-xl overflow-hidden">
       <div class="prose prose-zinc dark:prose-invert max-w-none 
-        prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
-        prose-h2:border-b prose-h2:border-white/15 dark:prose-h2:border-white/10 prose-h2:pb-3 prose-h2:mt-10 prose-h2:mb-4
-        prose-h3:text-zinc-900 dark:prose-h3:text-zinc-100 prose-h3:mt-8 prose-h3:mb-3
-        prose-p:leading-relaxed prose-p:text-zinc-700 dark:prose-p:text-zinc-300
-        prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-a:font-semibold prose-a:underline underline-offset-4 hover:prose-a:text-indigo-500
-        prose-strong:font-bold prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100
-        prose-code:font-mono prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-code:bg-indigo-500/10 dark:prose-code:bg-indigo-400/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:border prose-code:border-indigo-500/15
-        prose-blockquote:border-l-2 prose-blockquote:border-indigo-500 prose-blockquote:bg-white/40 dark:prose-blockquote:bg-white/5 prose-blockquote:py-2.5 prose-blockquote:px-5 prose-blockquote:rounded-r-2xl prose-blockquote:italic
+        prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-zinc-100
+        prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-3 prose-h2:mt-10 prose-h2:mb-4
+        prose-h3:text-zinc-100 prose-h3:mt-8 prose-h3:mb-3
+        prose-p:leading-relaxed prose-p:text-zinc-300
+        prose-a:text-indigo-400 prose-a:font-semibold prose-a:underline underline-offset-4 hover:prose-a:text-indigo-300
+        prose-strong:font-bold prose-strong:text-zinc-100
+        prose-code:font-mono prose-code:text-indigo-400 prose-code:bg-indigo-400/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:border prose-code:border-indigo-500/20
+        prose-blockquote:border-l-2 prose-blockquote:border-indigo-500 prose-blockquote:bg-white/5 prose-blockquote:py-2.5 prose-blockquote:px-5 prose-blockquote:rounded-r-2xl prose-blockquote:italic
       ">
         <slot />
       </div>
 
       <!-- Bottom Author Bio Card -->
-      <div class="mt-10 p-6 sm:p-8 liquid-glass-card rounded-3xl border border-white/20 dark:border-white/10 shadow-lg">
+      <div class="mt-10 p-6 sm:p-8 liquid-glass-card rounded-3xl border border-white/10 shadow-lg">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           {authorAvatar && (authorAvatar.startsWith('/') || authorAvatar.startsWith('http')) ? (
             <img
               src={url(authorAvatar)}
               alt={authorName}
-              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-white/30 dark:border-white/10 shadow-lg ring-2 ring-indigo-500/25 shrink-0"
+              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-white/20 shadow-lg ring-2 ring-indigo-500/25 shrink-0"
             />
           ) : (
             <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl liquid-pill flex items-center justify-center text-3xl shadow-lg shrink-0">
@@ -172,60 +247,58 @@ const ui = siteConfig.ui || {
           )}
 
           <div class="flex-1">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 mb-1.5">
-              {ui.writtenByText || 'Written by'}
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 mb-1.5">
+              {ui.writtenByText || '本文撰写'}
             </div>
-            <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50">{authorName}</h3>
-            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-2">{authorRole}</div>
-            <p class="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed mb-3">
+            <h3 class="text-lg font-bold text-zinc-50">{authorName}</h3>
+            <div class="text-xs text-indigo-400 font-medium mb-2">{authorRole}</div>
+            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-3">
               {authorBio}
             </p>
 
-            {authorSocial && (
-              <div class="flex items-center gap-2">
-                {authorSocial.github && (
-                  <a href={authorSocial.github} target="_blank" rel="noopener noreferrer" class="p-2 rounded-full liquid-pill hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="GitHub">
-                    <Github class="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {authorSocial.twitter && (
-                  <a href={authorSocial.twitter} target="_blank" rel="noopener noreferrer" class="p-2 rounded-full liquid-pill hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="Twitter / X">
-                    <Twitter class="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {authorSocial.linkedin && (
-                  <a href={authorSocial.linkedin} target="_blank" rel="noopener noreferrer" class="p-2 rounded-full liquid-pill hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="LinkedIn">
-                    <Linkedin class="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {authorSocial.email && (
-                  <a href={`mailto:${authorSocial.email}`} class="p-2 rounded-full liquid-pill hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="Email">
-                    <Mail class="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            )}
+            <div class="flex items-center gap-2">
+              {authorSocial?.github && (
+                <a href={authorSocial.github} target="_blank" rel="noopener noreferrer" class="p-2 rounded-full liquid-pill hover:text-indigo-300 transition-colors" title="GitHub">
+                  <Github class="w-3.5 h-3.5" />
+                </a>
+              )}
+              {authorSocial?.twitter && (
+                <a href={authorSocial.twitter} target="_blank" rel="noopener noreferrer" class="p-2 rounded-full liquid-pill hover:text-indigo-300 transition-colors" title="Twitter / X">
+                  <Twitter class="w-3.5 h-3.5" />
+                </a>
+              )}
+              {authorSocial?.linkedin && (
+                <a href={authorSocial.linkedin} target="_blank" rel="noopener noreferrer" class="p-2 rounded-full liquid-pill hover:text-indigo-300 transition-colors" title="LinkedIn">
+                  <Linkedin class="w-3.5 h-3.5" />
+                </a>
+              )}
+              {authorSocial?.email && (
+                <a href={`mailto:${authorSocial.email}`} class="p-2 rounded-full liquid-pill hover:text-indigo-300 transition-colors" title="Email">
+                  <Mail class="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Chapter Navigation Links -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-white/20 dark:border-white/10">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 pt-8 border-t border-white/10">
         {prevPost ? (
           <a
             href={url(`/blog/${prevPost.id.replace(/\.(md|mdx)$/, '')}`)}
             class="p-4 rounded-2xl liquid-glass-card shadow-xs flex flex-col justify-between transition-all"
           >
-            <span class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1 uppercase">
-              <ArrowLeft class="w-3.5 h-3.5" /> Previous Article
+            <span class="text-xs text-indigo-400 font-semibold flex items-center gap-1 uppercase">
+              <ArrowLeft class="w-3.5 h-3.5" /> 上一篇技术解析
             </span>
-            <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1 mt-1">
+            <span class="text-sm font-semibold text-zinc-100 line-clamp-1 mt-1">
               {prevPost.data.title}
             </span>
           </a>
         ) : (
-          <div class="p-4 rounded-2xl border border-dashed border-white/20 dark:border-white/10 text-zinc-400 font-mono text-xs flex items-center">
-            // Earliest Post
+          <div class="p-4 rounded-2xl border border-dashed border-white/10 text-zinc-500 font-mono text-xs flex items-center">
+            // 已是最初篇目
           </div>
         )}
 
@@ -234,16 +307,16 @@ const ui = siteConfig.ui || {
             href={url(`/blog/${nextPost.id.replace(/\.(md|mdx)$/, '')}`)}
             class="p-4 rounded-2xl liquid-glass-card shadow-xs flex flex-col justify-between text-right transition-all"
           >
-            <span class="text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center justify-end gap-1 uppercase">
-              Next Post <ArrowRight class="w-3.5 h-3.5" />
+            <span class="text-xs text-indigo-400 font-semibold flex items-center justify-end gap-1 uppercase">
+              下一篇深度分享 <ArrowRight class="w-3.5 h-3.5" />
             </span>
-            <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-1 mt-1">
+            <span class="text-sm font-semibold text-zinc-100 line-clamp-1 mt-1">
               {nextPost.data.title}
             </span>
           </a>
         ) : (
-          <div class="p-4 rounded-2xl border border-dashed border-white/20 dark:border-white/10 text-zinc-400 font-mono text-xs flex items-center justify-end">
-            // Latest Post
+          <div class="p-4 rounded-2xl border border-dashed border-white/10 text-zinc-500 font-mono text-xs flex items-center justify-end">
+            // 已是最新发布
           </div>
         )}
       </div>
@@ -251,13 +324,12 @@ const ui = siteConfig.ui || {
 
     <!-- Right: Sidebar (4 cols) -->
     <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1">
-      <!-- Table of Contents -->
       <TableOfContents headings={headings} />
 
-      <!-- Author Profile Card with Photo -->
+      <!-- Author Profile Card -->
       <div class="p-6 liquid-glass rounded-3xl shadow-lg overflow-hidden">
-        <div class="flex items-center justify-between border-b border-white/20 dark:border-white/10 pb-3 mb-4">
-          <span class="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">{ui.authorCardTitle || 'About the Author'}</span>
+        <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+          <span class="text-xs font-bold text-zinc-100 uppercase tracking-wider">{ui.authorCardTitle || '作者专栏'}</span>
         </div>
 
         <div class="flex items-start gap-3.5">
@@ -265,7 +337,7 @@ const ui = siteConfig.ui || {
             <img
               src={url(authorAvatar)}
               alt={authorName}
-              class="w-12 h-12 rounded-2xl object-cover border border-white/25 dark:border-white/10 shadow-md ring-2 ring-indigo-500/20 shrink-0"
+              class="w-12 h-12 rounded-2xl object-cover border border-white/20 shadow-md ring-2 ring-indigo-500/20 shrink-0"
             />
           ) : (
             <div class="w-11 h-11 rounded-full liquid-pill flex items-center justify-center text-lg shadow-sm shrink-0">
@@ -273,54 +345,47 @@ const ui = siteConfig.ui || {
             </div>
           )}
           <div>
-            <div class="font-bold text-sm text-zinc-900 dark:text-zinc-50">{authorName}</div>
-            <div class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">{authorRole}</div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1.5 leading-relaxed">
+            <div class="font-bold text-sm text-zinc-50">{authorName}</div>
+            <div class="text-[11px] text-indigo-400 font-medium">{authorRole}</div>
+            <p class="text-xs text-zinc-400 mt-1.5 leading-relaxed">
               {authorBio}
             </p>
 
-            {authorSocial && (
-              <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-white/10">
-                {authorSocial.github && (
-                  <a href={authorSocial.github} target="_blank" rel="noopener noreferrer" class="p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="GitHub">
-                    <Github class="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {authorSocial.twitter && (
-                  <a href={authorSocial.twitter} target="_blank" rel="noopener noreferrer" class="p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="Twitter / X">
-                    <Twitter class="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {authorSocial.linkedin && (
-                  <a href={authorSocial.linkedin} target="_blank" rel="noopener noreferrer" class="p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="LinkedIn">
-                    <Linkedin class="w-3.5 h-3.5" />
-                  </a>
-                )}
-                {authorSocial.email && (
-                  <a href={`mailto:${authorSocial.email}`} class="p-1 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors" title="Email">
-                    <Mail class="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            )}
+            <div class="flex items-center gap-1.5 mt-3 pt-2.5 border-t border-white/10">
+              {authorSocial?.github && (
+                <a href={authorSocial.github} target="_blank" rel="noopener noreferrer" class="p-1 text-zinc-400 hover:text-indigo-300 transition-colors" title="GitHub">
+                  <Github class="w-3.5 h-3.5" />
+                </a>
+              )}
+              {authorSocial?.twitter && (
+                <a href={authorSocial.twitter} target="_blank" rel="noopener noreferrer" class="p-1 text-zinc-400 hover:text-indigo-300 transition-colors" title="Twitter / X">
+                  <Twitter class="w-3.5 h-3.5" />
+                </a>
+              )}
+              {authorSocial?.email && (
+                <a href={`mailto:${authorSocial.email}`} class="p-1 text-zinc-400 hover:text-indigo-300 transition-colors" title="Email">
+                  <Mail class="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Share Widget -->
       <div class="p-6 liquid-glass rounded-3xl shadow-lg overflow-hidden">
-        <div class="text-xs uppercase tracking-wider font-bold text-zinc-900 dark:text-zinc-100 mb-1.5">
-          {ui.shareTitle || 'Share This Post'}
+        <div class="text-xs uppercase tracking-wider font-bold text-zinc-100 mb-1.5">
+          {ui.shareTitle || '分享与探讨'}
         </div>
-        <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-4 leading-relaxed">
-          {ui.shareDescription || 'Found this post helpful? Share it with your developer friends.'}
+        <p class="text-xs text-zinc-400 mb-4 leading-relaxed">
+          {ui.shareDescription || '若本篇分析对您有所启发，欢迎分享至技术社群。'}
         </p>
         <button
-          onclick={`navigator.clipboard.writeText(window.location.href); alert(${JSON.stringify(ui.shareCopiedMessage || 'Post link copied to clipboard!')});`}
-          class="w-full py-2.5 rounded-full liquid-pill hover:text-indigo-600 dark:hover:text-indigo-300 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 shadow-xs transition-all"
+          onclick={`navigator.clipboard.writeText(window.location.href); alert(${JSON.stringify(ui.shareCopiedMessage || '文章链接已复制到剪贴板！')});`}
+          class="w-full py-2.5 rounded-full liquid-pill hover:text-indigo-300 text-xs font-semibold cursor-pointer flex items-center justify-center gap-2 shadow-xs transition-all"
         >
           <Share2 class="w-3.5 h-3.5" />
-          <span>Copy Post Link</span>
+          <span>复制文章链接</span>
         </button>
       </div>
     </aside>
