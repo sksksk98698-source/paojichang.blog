@@ -41,7 +41,7 @@
     "lucide-astro": "latest",
     "mdast-util-to-string": "latest",
     "reading-time": "latest",
-    "tailwindcss": "4.3.3",
+    "tailwindcss": "4.3.4",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
